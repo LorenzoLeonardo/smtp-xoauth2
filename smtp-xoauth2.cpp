@@ -6,6 +6,7 @@
 #include "framework.h"
 #include "smtp-xoauth2.h"
 #include "smtp-xoauth2Dlg.h"
+#include "TcpClient.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,7 +72,26 @@ BOOL Csmtpxoauth2App::InitInstance()
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+    
+	TcpClient client = TcpClient("127.0.0.1", 1986);
 
+	if (!client.Connect()) {
+        // Delete the shell manager created above.
+        if (pShellManager != nullptr) {
+            delete pShellManager;
+        }
+
+#if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
+        ControlBarCleanUp();
+#endif
+
+        // Since the dialog has been closed, return FALSE so that we
+        // exit the
+        //  application, rather than start the application's message
+        //  pump.
+        AfxMessageBox(IDP_CONNECTION_FAILED);
+        return FALSE;
+	}
 	Csmtpxoauth2Dlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -103,6 +123,7 @@ BOOL Csmtpxoauth2App::InitInstance()
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
+    client.Close();
 	return FALSE;
 }
 
