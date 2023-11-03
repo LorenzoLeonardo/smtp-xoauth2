@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "TcpClient.h"
 
 // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx
@@ -12,6 +12,7 @@ class Csmtpxoauth2Dlg : public CDialogEx
 public:
 	Csmtpxoauth2Dlg(CWnd* pParent = nullptr);	// standard constructor
 
+	void SetTcpClient(TcpClient& client) { _client = client;	}
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_SMTPXOAUTH2_DIALOG };
@@ -24,11 +25,14 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-
+	TcpClient _client;
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+      public:
+        CEdit _editInputArea;
+        afx_msg void OnBnClickedOk();
 };

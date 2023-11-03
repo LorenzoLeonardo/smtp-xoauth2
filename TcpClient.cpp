@@ -5,7 +5,7 @@ TcpClient::TcpClient(const char *serverIp, int serverPort)
     : _serverIp(serverIp), _serverPort(serverPort) {
 
   _clientSocket = INVALID_SOCKET;
-  if (WSAStartup(MAKEWORD(2, 2), &wsaData_) != 0) {
+  if (WSAStartup(MAKEWORD(2, 2), &_wsaData) != 0) {
     std::cerr << "WSAStartup failed" << std::endl;
     return;
   }
@@ -46,7 +46,7 @@ bool TcpClient::Connect() {
 }
 
 bool TcpClient::Send(const char *data, int length) {
-  if (UINT16_MAX > length) {
+  if (UINT16_MAX < length) {
     std::cerr << "Error max data length overflow" << std::endl;
     return false;
   }
@@ -60,7 +60,7 @@ bool TcpClient::Send(const char *data, int length) {
 
 bool TcpClient::Receive(char *buffer, int length) {
 
-  if (UINT16_MAX > length) {
+  if (UINT16_MAX < length) {
     std::cerr << "Error max data length overflow" << std::endl;
     return false;
   }

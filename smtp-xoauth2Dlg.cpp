@@ -58,14 +58,16 @@ Csmtpxoauth2Dlg::Csmtpxoauth2Dlg(CWnd* pParent /*=nullptr*/)
 
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+        CDialogEx::DoDataExchange(pDX);
+        DDX_Control(pDX, IDC_EDIT_INPUT_AREA, _editInputArea);
 }
 
 BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-END_MESSAGE_MAP()
+        ON_BN_CLICKED(IDOK, &Csmtpxoauth2Dlg::OnBnClickedOk)
+        END_MESSAGE_MAP()
 
 
 // Csmtpxoauth2Dlg message handlers
@@ -153,3 +155,30 @@ HCURSOR Csmtpxoauth2Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void Csmtpxoauth2Dlg::OnBnClickedOk() {
+    CString input;
+
+	_editInputArea.GetWindowTextW(input);
+    
+	int wideStringLength = input.GetLength();
+
+
+	WCHAR *narrowStringBuffer = input.GetBuffer(wideStringLength);
+
+    int bufferSize =
+            WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer,
+                                wideStringLength,
+                                NULL, 0, NULL, NULL);
+
+	std::unique_ptr<char[]> narrowString(new char[bufferSize + 1]);
+    std::fill(narrowString.get(), narrowString.get() + bufferSize + 1, '\0');
+
+    WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer, wideStringLength,
+                            narrowString.get(), bufferSize, NULL, NULL);
+	
+	_client.Send(narrowString.get(), bufferSize);
+
+	input.ReleaseBuffer();
+}

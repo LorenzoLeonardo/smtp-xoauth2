@@ -93,6 +93,7 @@ BOOL Csmtpxoauth2App::InitInstance()
         return FALSE;
 	}
 	Csmtpxoauth2Dlg dlg;
+    dlg.SetTcpClient(client);
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
