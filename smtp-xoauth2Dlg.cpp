@@ -7,7 +7,9 @@
 #include "smtp-xoauth2.h"
 #include "smtp-xoauth2Dlg.h"
 #include "afxdialogex.h"
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
