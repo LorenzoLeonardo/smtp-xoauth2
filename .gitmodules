@@ -1,3 +1,3 @@
 [submodule "json"]
 	path = json
-	url = ssh://git@github.com/LorenzoLeonardo/json.git
+	url = https://github.com/LorenzoLeonardo/json.git
