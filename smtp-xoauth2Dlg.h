@@ -4,7 +4,7 @@
 
 #pragma once
 #include "TcpClient.h"
-
+#include "OAuth2DeviceCodeFlow.h"
 // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx
 {
@@ -41,5 +41,11 @@ protected:
         afx_msg void OnBnClickedOk();
         CEdit _editResponseArea;
         TcpClient _client;
+
+	DeviceCodeFlow generateDeviceCodeFlow(std::string);
+        afx_msg void OnBnClickedCancel();
+        afx_msg void OnBnClickedButtonRequestToken();
+        afx_msg void OnBnClickedButtonLogout();
+        afx_msg void OnBnClickedButtonSubscribeEvent();
 };
 UINT MyThreadFunction(LPVOID pParam);
