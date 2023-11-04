@@ -211,7 +211,10 @@ UINT MyThreadFunction(LPVOID pParam) {
                                 wideBuffer.get(), bytes_read);
             wideBuffer[bytes_read] = L'\0';
 
-            dlg->_editResponseArea.SetWindowTextW(wideBuffer.get());
+			dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
+            dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE, (LPARAM)wideBuffer.get());
+            dlg->_editResponseArea.SendMessage( EM_SETSEL, -1, -1);
+            dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE, (LPARAM)L"\r\n\r\n");
         } else {
             break;
 		}
