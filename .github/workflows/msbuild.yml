@@ -12,9 +12,7 @@ jobs:
           submodules: recursive  # Initialize and update submodules
 
       - name: Set up MSVC
-        uses: microsoft/setup-msvc@v2
-        with:
-          msvc-version: 2019
-
+        run: |
+          choco install visualstudio2019buildtools --package-parameters "--includeRecommended"
       - name: Build C++ project
         run: msbuild YourProject.sln /t:Build
