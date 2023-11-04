@@ -4,6 +4,6 @@ This is a sample Application that marries C++ and Rust into one ecosystem with J
 
 ## Backend is done in Rust Programming Language:
 
-# ipc-server: https://github.com/LorenzoLeonardo/ipc-server
-# modern-auth-service: https://github.com/LorenzoLeonardo/modern-auth-service
-# emailer-service: (Upcoming development)
+### ipc-server: https://github.com/LorenzoLeonardo/ipc-server
+### modern-auth-service: https://github.com/LorenzoLeonardo/modern-auth-service
+### emailer-service: (Upcoming development)
