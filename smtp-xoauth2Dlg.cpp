@@ -54,12 +54,14 @@ Csmtpxoauth2Dlg::Csmtpxoauth2Dlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SMTPXOAUTH2_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    _pThread = NULL;
 }
 
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange* pDX)
 {
-        CDialogEx::DoDataExchange(pDX);
-        DDX_Control(pDX, IDC_EDIT_INPUT_AREA, _editInputArea);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_EDIT_INPUT_AREA, _editInputArea);
+    DDX_Control(pDX, IDC_EDIT_OUTPUT, _editResponseArea);
 }
 
 BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
@@ -102,7 +104,8 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-
+    _pThread = AfxBeginThread(
+            MyThreadFunction, this, THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -178,7 +181,40 @@ void Csmtpxoauth2Dlg::OnBnClickedOk() {
     WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer, wideStringLength,
                             narrowString.get(), bufferSize, NULL, NULL);
 	
-	_client.Send(narrowString.get(), bufferSize);
+	int byte_sent = _client.Send(narrowString.get(), bufferSize);
+    std::cerr << "Bytes sent: " << byte_sent << std::endl;
 
 	input.ReleaseBuffer();
+	
+}
+
+UINT MyThreadFunction(LPVOID pParam) {
+    // Your thread logic here
+    Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
+    while (true) {
+        std::unique_ptr<char[]> buffer(new char[UINT16_MAX]);
+        int bytes_read = dlg->_client.Receive(buffer.get(), UINT16_MAX);
+        if (bytes_read != SOCKET_ERROR) {
+            // Calculate the required buffer size for the wide
+            // character string
+			int bufferSize = MultiByteToWideChar(
+				CP_UTF8, 0, buffer.get(),
+										-1, nullptr, 0);
+
+            // Create a unique_ptr for the wide character string
+            std::unique_ptr<wchar_t[]> wideBuffer(
+                new wchar_t[bytes_read + 1]);
+
+            // Perform the conversion from multi-byte to wide
+            // character
+            MultiByteToWideChar(CP_UTF8, 0, buffer.get(), -1,
+                                wideBuffer.get(), bytes_read);
+            wideBuffer[bytes_read] = L'\0';
+
+            dlg->_editResponseArea.SetWindowTextW(wideBuffer.get());
+        } else {
+            break;
+		}
+    }
+    return 0; // Return the thread exit code
 }

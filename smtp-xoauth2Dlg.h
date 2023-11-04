@@ -11,7 +11,9 @@ class Csmtpxoauth2Dlg : public CDialogEx
 // Construction
 public:
 	Csmtpxoauth2Dlg(CWnd* pParent = nullptr);	// standard constructor
-
+	~Csmtpxoauth2Dlg() { 
+		_client.Close();
+	}
 	void SetTcpClient(TcpClient& client) { _client = client;	}
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -25,7 +27,9 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	TcpClient _client;
+
+
+    CWinThread *_pThread;
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -35,4 +39,7 @@ protected:
       public:
         CEdit _editInputArea;
         afx_msg void OnBnClickedOk();
+        CEdit _editResponseArea;
+        TcpClient _client;
 };
+UINT MyThreadFunction(LPVOID pParam);

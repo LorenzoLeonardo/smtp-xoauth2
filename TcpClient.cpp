@@ -45,29 +45,29 @@ bool TcpClient::Connect() {
   return true;
 }
 
-bool TcpClient::Send(const char *data, int length) {
+int TcpClient::Send(const char *data, int length) {
   if (UINT16_MAX < length) {
     std::cerr << "Error max data length overflow" << std::endl;
-    return false;
+    return SOCKET_ERROR;
   }
   int bytesSent = send(_clientSocket, data, length, 0);
   if (bytesSent == SOCKET_ERROR) {
     std::cerr << "Error sending data: " << WSAGetLastError() << std::endl;
-    return false;
+    return SOCKET_ERROR;
   }
-  return true;
+  return bytesSent;
 }
 
-bool TcpClient::Receive(char *buffer, int length) {
+int TcpClient::Receive(char *buffer, int length) {
 
   if (UINT16_MAX < length) {
     std::cerr << "Error max data length overflow" << std::endl;
-    return false;
+    return SOCKET_ERROR;
   }
   int bytesRead = recv(_clientSocket, buffer, length, 0);
   if (bytesRead == SOCKET_ERROR) {
     std::cerr << "Error receiving data: " << WSAGetLastError() << std::endl;
-    return false;
+    return SOCKET_ERROR;
   }
-  return true;
+  return bytesRead;
 }

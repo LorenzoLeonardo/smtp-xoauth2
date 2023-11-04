@@ -14,9 +14,9 @@ public:
 
   bool Connect();
 
-  bool Send(const char *data, int length);
+  int Send(const char *data, int length);
 
-  bool Receive(char *buffer, int length);
+  int Receive(char *buffer, int length);
 
   void Close();
 
