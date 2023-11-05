@@ -295,6 +295,10 @@ UINT MyThreadFunction(LPVOID pParam) {
         std::unique_ptr<char[]> buffer(new char[UINT16_MAX]);
         int bytes_read = dlg->_client.Receive(buffer.get(), UINT16_MAX);
         if (bytes_read != SOCKET_ERROR) {
+
+            std::string jsonStr(buffer.get(), bytes_read);
+            handleJsonMessages(jsonStr);
+            
             // Calculate the required buffer size for the wide
             // character string
 			int bufferSize = MultiByteToWideChar(
@@ -322,7 +326,88 @@ UINT MyThreadFunction(LPVOID pParam) {
     return 0; // Return the thread exit code
 }
 
-/* void Csmtpxoauth2Dlg::OnBnClickedOk() {
+JsonType determineJsonType(const nlohmann::json &json_data) {
+    if (json_data.find("response") != json_data.end()) {
+        json response = json_data.at("response");
+        if (response.find("device_code") != response.end()) {
+            return JsonType::LoginReply;
+        } else if (response.find("access_token") != response.end()) {
+            return JsonType::TokenResponse;
+        } else {
+            return JsonType::Unknown;
+        }
+    } else if (json_data.find("error") != json_data.end()) {
+        return JsonType::Error;
+    } else {
+        return JsonType::Unknown;
+    }
+}
+
+void handleJsonMessages(std::string jsonStr) {
+    json jsonLogin = nlohmann::json::parse(jsonStr);
+
+    JsonType jType = determineJsonType(jsonLogin);
+
+    try {
+        switch (jType) {
+            case JsonType::LoginReply: {
+                LoginReply login;
+
+                login.interval =
+                    jsonLogin.at("response").at("interval").get<int>();
+                login.device_code =
+                    jsonLogin.at("response").at("device_code").get<std::string>();
+                login.user_code =
+                    jsonLogin.at("response").at("user_code").get<std::string>();
+                login.verification_uri = jsonLogin.at("response")
+                                                      .at("verification_uri")
+                                                      .get<std::string>();
+                login.expires_in =
+                    jsonLogin.at("response").at("expires_in").get<int>();
+            }
+            case JsonType::Error: {
+                Error error;
+
+                error.error = jsonLogin.at("error").get<std::string>();
+            }
+            case JsonType::TokenResponse: {
+                TokenResponse token;
+
+                token.access_token = jsonLogin.at("response")
+                                         .at("access_token")
+                                         .get<std::string>();
+                token.refresh_token = jsonLogin.at("response")
+                                         .at("refresh_token")
+                                         .get<std::string>();
+                token.scopes = jsonLogin.at("response")
+                                          .at("scopes")
+                                          .get<std::vector<std::string>>();
+                token.expires_in.secs = jsonLogin.at("response")
+                                   .at("expires_in")
+                                   .at("secs")
+                                   .get<int>();
+                token.expires_in.nanos = jsonLogin.at("response")
+                                            .at("expires_in")
+                                            .at("nanos")
+                                            .get<int>();
+                token.token_receive_time.secs = jsonLogin.at("response")
+                                             .at("token_receive_time")
+                                             .at("secs")
+                                             .get<int>();
+                token.token_receive_time.nanos = jsonLogin.at("response")
+                                                    .at("token_receive_time")
+                                                    .at("nanos")
+                                                    .get<int>();
+            }
+            default: {
+
+            }
+        }
+    } catch (const nlohmann::json::exception &e) {
+        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+    }
+}
+    /* void Csmtpxoauth2Dlg::OnBnClickedOk() {
 CString input;
 
 _editInputArea.GetWindowTextW(input);
