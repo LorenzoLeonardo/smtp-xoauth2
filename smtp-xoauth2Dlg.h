@@ -49,3 +49,37 @@ protected:
         afx_msg void OnBnClickedButtonSubscribeEvent();
 };
 UINT MyThreadFunction(LPVOID pParam);
+
+enum class JsonType { LoginReply, Error, TokenResponse, Unknown };
+
+struct LoginReply {
+    int interval;
+    std::string device_code;
+    std::string user_code;
+    std::string verification_uri;
+    int expires_in;
+};
+
+struct Error {
+    std::string error;
+};
+
+struct TokenResponse {
+    struct ExpiresIn {
+      int secs;
+      int nanos;
+    };
+
+    std::string access_token;
+    std::vector<std::string> scopes;
+    struct TokenReceiveTime {
+      int secs;
+      int nanos;
+    };
+    std::string refresh_token;
+    ExpiresIn expires_in;
+    TokenReceiveTime token_receive_time;
+};
+
+void handleJsonMessages(std::string jsonStr);
+JsonType determineJsonType(const nlohmann::json &json_data);
