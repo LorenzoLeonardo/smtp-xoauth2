@@ -3,6 +3,7 @@
 //
 #include "pch.h"
 
+#include "Helpers.h"
 #include "afxdialogex.h"
 #include "framework.h"
 #include "smtp-xoauth2.h"
@@ -93,7 +94,6 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     //  when the application's main window is not a dialog
     SetIcon(m_hIcon, TRUE);  // Set big icon
     SetIcon(m_hIcon, FALSE); // Set small icon
-
     _pLoginDialog = std::make_unique<CLoginDlg>(this);
     _pLoginDialog->Create(IDD_DIALOG_LOGIN, this);
     // TODO: Add extra initialization here
@@ -277,6 +277,7 @@ UINT MyThreadFunction(LPVOID pParam) {
     // Your thread logic here
     Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
     while (true) {
+
         std::unique_ptr<char[]> buffer(new char[UINT16_MAX]);
         int bytes_read = dlg->_client.Receive(buffer.get(), UINT16_MAX);
         if (bytes_read != SOCKET_ERROR) {
@@ -284,23 +285,10 @@ UINT MyThreadFunction(LPVOID pParam) {
             std::string jsonStr(buffer.get(), bytes_read);
             dlg->handleJsonMessages(jsonStr);
 
-            // Calculate the required buffer size for the wide
-            // character string
-            int bufferSize =
-                MultiByteToWideChar(CP_UTF8, 0, buffer.get(), -1, nullptr, 0);
-
-            // Create a unique_ptr for the wide character string
-            std::unique_ptr<wchar_t[]> wideBuffer(new wchar_t[bytes_read + 1]);
-
-            // Perform the conversion from multi-byte to wide
-            // character
-            MultiByteToWideChar(CP_UTF8, 0, buffer.get(), -1, wideBuffer.get(),
-                                bytes_read);
-            wideBuffer[bytes_read] = L'\0';
-
             dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
-            dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE,
-                                               (LPARAM)wideBuffer.get());
+            dlg->_editResponseArea.SendMessage(
+                EM_REPLACESEL, TRUE,
+                (LPARAM) static_cast<LPCTSTR>(Helpers::Utf8ToCString(jsonStr)));
             dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
             dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE,
                                                (LPARAM)L"\r\n\r\n");
