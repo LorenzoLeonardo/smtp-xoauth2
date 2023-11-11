@@ -31,4 +31,5 @@ class CLoginDlg : public CDialogEx {
     virtual BOOL OnInitDialog();
     virtual void OnCancel();
     CStatic _ctrlStaticNote;
+    afx_msg void OnEnSetfocusEditUserCode();
 };

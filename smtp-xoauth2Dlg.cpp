@@ -278,13 +278,12 @@ UINT MyThreadFunction(LPVOID pParam) {
     // Your thread logic here
     Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
     while (true) {
+        char buffer[UINT16_MAX] = {};
 
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(UINT16_MAX);
-        std::fill(buffer.get(), buffer.get() + UINT16_MAX, 0);
-        int bytes_read = dlg->_client.Receive(buffer.get(), UINT16_MAX);
+        int bytes_read = dlg->_client.Receive(buffer, UINT16_MAX);
         if (bytes_read != SOCKET_ERROR) {
 
-            std::string jsonStr(buffer.get(), bytes_read);
+            std::string jsonStr(buffer, bytes_read);
             dlg->handleJsonMessages(jsonStr);
 
             dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
@@ -373,7 +372,12 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         case JsonType::TokenResponseError: {
             TokenResponseError token = handleTokenResponseError(jsonLogin);
 
-            _pLoginDialog->SetErrorNotice(token.error_code_desc);
+            _pLoginDialog->ShowWindow(SW_HIDE);
+            _pLoginDialog->UpdateWindow();
+            AfxMessageBox(static_cast<LPCTSTR>(
+                              Helpers::Utf8ToCString(token.error_code_desc)),
+                          MB_ICONERROR | MB_OK);
+            this->PostMessage(WM_CLOSE);
             break;
         }
         default: {
