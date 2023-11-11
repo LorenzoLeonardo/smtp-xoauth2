@@ -188,6 +188,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CLoginDlg.h" />
+    <ClInclude Include="Emailer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="OAuth2DeviceCodeFlow.h" />
@@ -200,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLoginDlg.cpp" />
+    <ClCompile Include="Emailer.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="OAuth2DeviceCodeFlow.cpp" />
     <ClCompile Include="pch.cpp">
