@@ -211,6 +211,7 @@
     <ResourceCompile Include="smtpxoauth2.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".clang-format" />
     <None Include="res\smtpxoauth2.rc2" />
   </ItemGroup>
   <ItemGroup>
