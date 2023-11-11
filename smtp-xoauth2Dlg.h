@@ -11,7 +11,13 @@
 
 using json = nlohmann::json;
 
-enum class JsonType { LoginReply, Error, TokenResponse, Unknown };
+enum class JsonType {
+    LoginReply,
+    Error,
+    TokenResponse,
+    TokenResponseError,
+    Unknown
+};
 
 struct LoginReply {
     int interval;
@@ -40,6 +46,11 @@ struct TokenResponse {
     std::string refresh_token;
     ExpiresIn expires_in;
     TokenReceiveTime token_receive_time;
+};
+
+struct TokenResponseError {
+    std::string error_code_desc;
+    std::string error_code;
 };
 
 // Csmtpxoauth2Dlg dialog
@@ -83,6 +94,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     void handleJsonMessages(std::string jsonStr);
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
+    TokenResponseError handleTokenResponseError(json jsonLogin);
 };
 
 UINT MyThreadFunction(LPVOID pParam);
