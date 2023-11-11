@@ -88,6 +88,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
 
     DeviceCodeFlow generateDeviceCodeFlow(std::string);
     void login();
+    void requestToken();
     afx_msg void OnBnClickedButtonRequestToken();
     afx_msg void OnBnClickedButtonLogout();
     //    afx_msg void OnBnClickedButtonSubscribeEvent();

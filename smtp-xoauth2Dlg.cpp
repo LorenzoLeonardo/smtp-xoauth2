@@ -101,7 +101,7 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     // TODO: Add extra initialization here
     _pThread = AfxBeginThread(MyThreadFunction, this, THREAD_PRIORITY_NORMAL, 0,
                               0, nullptr);
-    login();
+    requestToken();
     return TRUE; // return TRUE  unless you set the focus to a control
 }
 
@@ -169,6 +169,7 @@ DeviceCodeFlow Csmtpxoauth2Dlg::generateDeviceCodeFlow(std::string method) {
 }
 
 void Csmtpxoauth2Dlg::login() {
+    this->EnableWindow(FALSE);
     DeviceCodeFlow flow = generateDeviceCodeFlow("login");
 
     json listen_event = {{"event_name", "oauth2"}};
@@ -195,6 +196,27 @@ void Csmtpxoauth2Dlg::login() {
     _pLoginDialog->UpdateWindow();
     byte_sent = _client.Send(jsonString.c_str(), (int)jsonString.length());
     std::cerr << "Bytes sent: " << byte_sent << std::endl;
+}
+
+void Csmtpxoauth2Dlg::requestToken() {
+    DeviceCodeFlow flow = generateDeviceCodeFlow("requestToken");
+
+    json flowJson = {
+        {"object", flow.object},
+        {"method", flow.method},
+        {"param",
+         {{"process", flow.param.process},
+          {"provider", flow.param.provider},
+          {"scopes", flow.param.scopes},
+          {"authorization_endpoint", flow.param.authorization_endpoint},
+          {"token_endpoint", flow.param.token_endpoint},
+          {"device_auth_endpoint", flow.param.device_auth_endpoint},
+          {"client_id", flow.param.client_id}}}};
+
+    std::string jsonString = flowJson.dump();
+
+    size_t byte_sent =
+        _client.Send(jsonString.c_str(), (int)jsonString.length());
 }
 
 // void Csmtpxoauth2Dlg::OnBnClickedCancel() {
@@ -362,12 +384,18 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             Error error;
 
             error.error = jsonLogin.at("error").get<std::string>();
-            _pLoginDialog->ShowWindow(SW_HIDE);
-            _pLoginDialog->UpdateWindow();
-            AfxMessageBox(
-                static_cast<LPCTSTR>(Helpers::Utf8ToCString(error.error)),
-                MB_ICONERROR | MB_OK);
-            this->PostMessage(WM_CLOSE);
+
+            if (error.error.find("io_error") != std::string::npos) {
+                login();
+            } else {
+                _pLoginDialog->ShowWindow(SW_HIDE);
+                _pLoginDialog->UpdateWindow();
+                this->EnableWindow(TRUE);
+                AfxMessageBox(
+                    static_cast<LPCTSTR>(Helpers::Utf8ToCString(error.error)),
+                    MB_ICONERROR | MB_OK);
+                this->PostMessage(WM_CLOSE);
+            }
             break;
         }
         case JsonType::TokenResponse: {
@@ -375,17 +403,25 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
 
             _pLoginDialog->ShowWindow(SW_HIDE);
             _pLoginDialog->UpdateWindow();
+            this->EnableWindow(TRUE);
             break;
         }
         case JsonType::TokenResponseError: {
             TokenResponseError token = handleTokenResponseError(jsonLogin);
 
-            _pLoginDialog->ShowWindow(SW_HIDE);
-            _pLoginDialog->UpdateWindow();
-            AfxMessageBox(static_cast<LPCTSTR>(
-                              Helpers::Utf8ToCString(token.error_code_desc)),
-                          MB_ICONERROR | MB_OK);
-            this->PostMessage(WM_CLOSE);
+            if (token.error_code == "no_token" ||
+                token.error_code == "expired_token" ||
+                token.error_code == "invalid_grant") {
+                login();
+            } else {
+
+                _pLoginDialog->ShowWindow(SW_HIDE);
+                _pLoginDialog->UpdateWindow();
+                AfxMessageBox(static_cast<LPCTSTR>(Helpers::Utf8ToCString(
+                                  token.error_code_desc)),
+                              MB_ICONERROR | MB_OK);
+                this->PostMessage(WM_CLOSE);
+            }
             break;
         }
         default: {
