@@ -279,7 +279,8 @@ UINT MyThreadFunction(LPVOID pParam) {
     Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
     while (true) {
 
-        std::unique_ptr<char[]> buffer(new char[UINT16_MAX]);
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(UINT16_MAX);
+        std::fill(buffer.get(), buffer.get() + UINT16_MAX, 0);
         int bytes_read = dlg->_client.Receive(buffer.get(), UINT16_MAX);
         if (bytes_read != SOCKET_ERROR) {
 
@@ -391,31 +392,3 @@ TokenResponse Csmtpxoauth2Dlg::handleTokenResponse(json jsonLogin) {
 
     return token;
 }
-
-/* void Csmtpxoauth2Dlg::OnBnClickedOk() {
-CString input;
-
-_editInputArea.GetWindowTextW(input);
-
-int wideStringLength = input.GetLength();
-
-
-WCHAR *narrowStringBuffer = input.GetBuffer(wideStringLength);
-
-int bufferSize =
-WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer,
-                    wideStringLength,
-                    NULL, 0, NULL, NULL);
-
-std::unique_ptr<char[]> narrowString(new char[bufferSize + 1]);
-std::fill(narrowString.get(), narrowString.get() + bufferSize + 1, '\0');
-
-WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer, wideStringLength,
-                narrowString.get(), bufferSize, NULL, NULL);
-
-int byte_sent = _client.Send(narrowString.get(), bufferSize);
-std::cerr << "Bytes sent: " << byte_sent << std::endl;
-
-input.ReleaseBuffer();
-
-}*/
