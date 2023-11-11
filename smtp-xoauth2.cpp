@@ -33,6 +33,43 @@ Csmtpxoauth2App::Csmtpxoauth2App()
 
 Csmtpxoauth2App theApp;
 
+std::optional<PROCESS_INFORMATION> LaunchProcess(LPCTSTR lpApplicationName) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    // Initialize the STARTUPINFO structure.
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    // Set other STARTUPINFO members as needed.
+
+    // Create the process
+    if (CreateProcess(
+			(LPTSTR)lpApplicationName, // lpApplicationName - use NULL
+            NULL, // lpCommandLine
+            NULL,                      // lpProcessAttributes
+            NULL,                      // lpThreadAttributes
+            FALSE,                     // bInheritHandles
+            CREATE_NO_WINDOW,          // dwCreationFlags
+            NULL,                      // lpEnvironment
+            NULL, // lpCurrentDirectory - use NULL for the same directory as the calling process
+            &si,  // lpStartupInfo
+            &pi   // lpProcessInformation
+            )) {
+        // Close process and thread handles to let the child process run
+        // independently
+		return pi;
+    } else {
+        return std::nullopt;
+    }
+}
+
+void Cleanup(std::vector<PROCESS_INFORMATION>& processes) {
+    for (const auto &element : processes) {
+        TerminateProcess(element.hProcess, 0);
+        CloseHandle(element.hProcess);
+        CloseHandle(element.hThread);
+    }
+}
 
 // Csmtpxoauth2App initialization
 
@@ -55,6 +92,27 @@ BOOL Csmtpxoauth2App::InitInstance()
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return FALSE;
 	}
+    auto result = LaunchProcess(_T("ipc_server.exe"));
+	if (result.has_value()) {
+		_processInfo.push_back(result.value());
+    } else {
+        Cleanup(_processInfo);
+        return FALSE;    
+	}
+    result = LaunchProcess(_T("modern-auth-service.exe"));
+    if (result.has_value()) {
+        _processInfo.push_back(result.value());
+    } else {
+        Cleanup(_processInfo);
+        return FALSE;
+    }
+    result = LaunchProcess(_T("emailer-service.exe"));
+    if (result.has_value()) {
+        _processInfo.push_back(result.value());
+    } else {
+        Cleanup(_processInfo);
+        return FALSE;
+    }
 
 
 	// Create the shell manager, in case the dialog contains
@@ -76,6 +134,7 @@ BOOL Csmtpxoauth2App::InitInstance()
 	TcpClient client = TcpClient("127.0.0.1", 1986);
 
 	if (!client.Connect()) {
+        Cleanup(_processInfo);
         // Delete the shell manager created above.
         if (pShellManager != nullptr) {
             delete pShellManager;
@@ -90,6 +149,7 @@ BOOL Csmtpxoauth2App::InitInstance()
         //  application, rather than start the application's message
         //  pump.
         AfxMessageBox(IDP_CONNECTION_FAILED);
+
         return FALSE;
 	}
 	Csmtpxoauth2Dlg dlg;
@@ -126,6 +186,7 @@ BOOL Csmtpxoauth2App::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
     client.Close();
+    Cleanup(_processInfo);
 	return FALSE;
 }
 

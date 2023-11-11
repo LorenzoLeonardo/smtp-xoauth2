@@ -9,8 +9,7 @@
 #endif
 
 #include "resource.h"		// main symbols
-
-
+#include <vector>
 // Csmtpxoauth2App:
 // See smtp-xoauth2.cpp for the implementation of this class
 //
@@ -23,10 +22,13 @@ public:
 // Overrides
 public:
 	virtual BOOL InitInstance();
+  // Implementation
 
-// Implementation
+protected:
+    std::vector<PROCESS_INFORMATION> _processInfo;
 
 	DECLARE_MESSAGE_MAP()
+
 };
 
 extern Csmtpxoauth2App theApp;
