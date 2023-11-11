@@ -25,6 +25,7 @@ void CLoginDlg::DoDataExchange(CDataExchange *pDX) {
 }
 
 BEGIN_MESSAGE_MAP(CLoginDlg, CDialogEx)
+ON_EN_SETFOCUS(IDC_EDIT_USER_CODE, &CLoginDlg::OnEnSetfocusEditUserCode)
 END_MESSAGE_MAP()
 
 void CLoginDlg::SetUrl(std::string url) {
@@ -61,4 +62,9 @@ void CLoginDlg::OnCancel() {
         GetParent()->PostMessage(WM_CLOSE);
     }
     CDialogEx::OnCancel();
+}
+
+void CLoginDlg::OnEnSetfocusEditUserCode() {
+    // TODO: Add your control notification handler code here
+    //_ctrlEditUserCode.SetSel(0, -1);
 }
