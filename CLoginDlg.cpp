@@ -28,11 +28,12 @@ END_MESSAGE_MAP()
 
 void CLoginDlg::SetUrl(std::string url) {
 
-    _ctrlStaticLink.SetWindowText(Helpers::Utf8ToCString(url).GetBuffer());
+    _ctrlStaticLink.SetWindowText(
+        static_cast<LPCTSTR>(Helpers::Utf8ToCString(url)));
 }
 void CLoginDlg::SetUserCode(std::string usercode) {
 
     _ctrlEditUserCode.SetWindowText(
-        Helpers::Utf8ToCString(usercode).GetBuffer());
+        static_cast<LPCTSTR>(Helpers::Utf8ToCString(usercode)));
 }
 void CLoginDlg::SetExpiryTime(int expires) {}
