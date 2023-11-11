@@ -27,4 +27,6 @@ class CLoginDlg : public CDialogEx {
   public:
     CMFCLinkCtrl _ctrlStaticLink;
     CEdit _ctrlEditUserCode;
+    virtual BOOL OnInitDialog();
+    virtual void OnCancel();
 };

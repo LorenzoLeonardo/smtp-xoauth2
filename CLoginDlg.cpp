@@ -37,3 +37,23 @@ void CLoginDlg::SetUserCode(std::string usercode) {
         static_cast<LPCTSTR>(Helpers::Utf8ToCString(usercode)));
 }
 void CLoginDlg::SetExpiryTime(int expires) {}
+
+BOOL CLoginDlg::OnInitDialog() {
+    CDialogEx::OnInitDialog();
+
+    if (GetParent() != NULL) {
+        GetParent()->EnableWindow(FALSE);
+    }
+
+    return TRUE;
+}
+
+void CLoginDlg::OnCancel() {
+    // TODO: Add your specialized code here and/or call the base class
+    if (GetParent() != NULL) {
+        GetParent()->EnableWindow(TRUE);
+
+        GetParent()->PostMessage(WM_CLOSE);
+    }
+    CDialogEx::OnCancel();
+}

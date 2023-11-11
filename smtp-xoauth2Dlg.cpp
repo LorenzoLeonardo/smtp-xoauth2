@@ -99,6 +99,7 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     // TODO: Add extra initialization here
     _pThread = AfxBeginThread(MyThreadFunction, this, THREAD_PRIORITY_NORMAL, 0,
                               0, nullptr);
+    OnBnClickedOk();
     return TRUE; // return TRUE  unless you set the focus to a control
 }
 
