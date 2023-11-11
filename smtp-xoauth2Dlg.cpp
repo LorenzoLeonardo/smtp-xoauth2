@@ -316,7 +316,15 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
     } else if (json_data.find("event") != json_data.end()) {
         if (json_data.find("result") != json_data.end()) {
             json response = json_data.at("result");
-            return JsonType::TokenResponse;
+            if (response.find("error_code") != response.end()) {
+                return JsonType::TokenResponseError;
+            } else if (response.find("access_token") != response.end()) {
+                return JsonType::TokenResponse;
+            } else {
+                return JsonType::Unknown;
+            }
+        } else if (json_data.find("error") != json_data.end()) {
+            return JsonType::Error;
         } else {
             return JsonType::Unknown;
         }
@@ -347,19 +355,29 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 jsonLogin.at("response").at("expires_in").get<int>();
             _pLoginDialog->SetUrl(login.verification_uri);
             _pLoginDialog->SetUserCode(login.user_code);
+            break;
         }
         case JsonType::Error: {
             Error error;
 
             error.error = jsonLogin.at("error").get<std::string>();
+            break;
         }
         case JsonType::TokenResponse: {
             TokenResponse token = handleTokenResponse(jsonLogin);
 
             _pLoginDialog->ShowWindow(SW_HIDE);
             _pLoginDialog->UpdateWindow();
+            break;
+        }
+        case JsonType::TokenResponseError: {
+            TokenResponseError token = handleTokenResponseError(jsonLogin);
+
+            _pLoginDialog->SetErrorNotice(token.error_code_desc);
+            break;
         }
         default: {
+            break;
         }
         }
     } catch (const nlohmann::json::exception &e) {
@@ -391,4 +409,23 @@ TokenResponse Csmtpxoauth2Dlg::handleTokenResponse(json jsonLogin) {
         response.at("token_receive_time").at("nanos").get<int>();
 
     return token;
+}
+
+TokenResponseError Csmtpxoauth2Dlg::handleTokenResponseError(json jsonLogin) {
+    json response;
+
+    if (jsonLogin.find("response") != jsonLogin.end()) {
+        response = jsonLogin.at("response");
+    } else if (jsonLogin.find("event") != jsonLogin.end()) {
+        if (jsonLogin.find("result") != jsonLogin.end()) {
+            response = jsonLogin.at("result");
+        }
+    }
+
+    TokenResponseError error;
+
+    error.error_code = response.at("error_code").get<std::string>();
+    error.error_code_desc = response.at("error_code_desc").get<std::string>();
+
+    return error;
 }

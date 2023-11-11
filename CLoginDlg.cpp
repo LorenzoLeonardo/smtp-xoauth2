@@ -21,6 +21,7 @@ void CLoginDlg::DoDataExchange(CDataExchange *pDX) {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_MFCLINK_LOGIN, _ctrlStaticLink);
     DDX_Control(pDX, IDC_EDIT_USER_CODE, _ctrlEditUserCode);
+    DDX_Control(pDX, IDC_STATIC_LOGIN_NOTICE, _ctrlStaticNote);
 }
 
 BEGIN_MESSAGE_MAP(CLoginDlg, CDialogEx)
@@ -38,6 +39,10 @@ void CLoginDlg::SetUserCode(std::string usercode) {
 }
 void CLoginDlg::SetExpiryTime(int expires) {}
 
+void CLoginDlg::SetErrorNotice(std::string error) {
+    _ctrlStaticNote.SetWindowText(
+        static_cast<LPCTSTR>(Helpers::Utf8ToCString(error)));
+}
 BOOL CLoginDlg::OnInitDialog() {
     CDialogEx::OnInitDialog();
 
