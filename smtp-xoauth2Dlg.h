@@ -82,19 +82,21 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     DECLARE_MESSAGE_MAP()
   public:
     CEdit _editInputArea;
-    afx_msg void OnBnClickedOk();
+    //    afx_msg void OnBnClickedOk();
     CEdit _editResponseArea;
     TcpClient _client;
 
     DeviceCodeFlow generateDeviceCodeFlow(std::string);
-    afx_msg void OnBnClickedCancel();
+    void login();
     afx_msg void OnBnClickedButtonRequestToken();
     afx_msg void OnBnClickedButtonLogout();
-    afx_msg void OnBnClickedButtonSubscribeEvent();
+    //    afx_msg void OnBnClickedButtonSubscribeEvent();
     void handleJsonMessages(std::string jsonStr);
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
     TokenResponseError handleTokenResponseError(json jsonLogin);
+    afx_msg void OnStnClickedStaticFrom();
+    afx_msg void OnBnClickedButtonSend();
 };
 
 UINT MyThreadFunction(LPVOID pParam);
