@@ -5,30 +5,28 @@
 #pragma once
 
 #ifndef __AFXWIN_H__
-	#error "include 'pch.h' before including this file for PCH"
+#error "include 'pch.h' before including this file for PCH"
 #endif
 
-#include "resource.h"		// main symbols
+#include "resource.h" // main symbols
 #include <vector>
 // Csmtpxoauth2App:
 // See smtp-xoauth2.cpp for the implementation of this class
 //
 
-class Csmtpxoauth2App : public CWinApp
-{
-public:
-	Csmtpxoauth2App();
+class Csmtpxoauth2App : public CWinApp {
+  public:
+    Csmtpxoauth2App();
 
-// Overrides
-public:
-	virtual BOOL InitInstance();
-  // Implementation
+    // Overrides
+  public:
+    virtual BOOL InitInstance();
+    // Implementation
 
-protected:
+  protected:
     std::vector<PROCESS_INFORMATION> _processInfo;
 
-	DECLARE_MESSAGE_MAP()
-
+    DECLARE_MESSAGE_MAP()
 };
 
 extern Csmtpxoauth2App theApp;

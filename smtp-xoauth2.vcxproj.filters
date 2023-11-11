@@ -63,6 +63,7 @@
     <None Include="res\smtpxoauth2.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\smtp-xoauth2.ico">

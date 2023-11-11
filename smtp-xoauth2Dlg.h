@@ -3,50 +3,45 @@
 //
 
 #pragma once
-#include "TcpClient.h"
 #include "OAuth2DeviceCodeFlow.h"
+#include "TcpClient.h"
 // Csmtpxoauth2Dlg dialog
-class Csmtpxoauth2Dlg : public CDialogEx
-{
-// Construction
-public:
-	Csmtpxoauth2Dlg(CWnd* pParent = nullptr);	// standard constructor
-	~Csmtpxoauth2Dlg() { 
-		_client.Close();
-	}
-	void SetTcpClient(TcpClient& client) { _client = client;	}
+class Csmtpxoauth2Dlg : public CDialogEx {
+    // Construction
+  public:
+    Csmtpxoauth2Dlg(CWnd *pParent = nullptr); // standard constructor
+    ~Csmtpxoauth2Dlg() { _client.Close(); }
+    void SetTcpClient(TcpClient &client) { _client = client; }
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_SMTPXOAUTH2_DIALOG };
+    enum { IDD = IDD_SMTPXOAUTH2_DIALOG };
 #endif
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+  protected:
+    virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
 
-
-// Implementation
-protected:
-	HICON m_hIcon;
-
+    // Implementation
+  protected:
+    HICON m_hIcon;
 
     CWinThread *_pThread;
-	// Generated message map functions
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
-      public:
-        CEdit _editInputArea;
-        afx_msg void OnBnClickedOk();
-        CEdit _editResponseArea;
-        TcpClient _client;
+    // Generated message map functions
+    virtual BOOL OnInitDialog();
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+    DECLARE_MESSAGE_MAP()
+  public:
+    CEdit _editInputArea;
+    afx_msg void OnBnClickedOk();
+    CEdit _editResponseArea;
+    TcpClient _client;
 
-	DeviceCodeFlow generateDeviceCodeFlow(std::string);
-        afx_msg void OnBnClickedCancel();
-        afx_msg void OnBnClickedButtonRequestToken();
-        afx_msg void OnBnClickedButtonLogout();
-        afx_msg void OnBnClickedButtonSubscribeEvent();
+    DeviceCodeFlow generateDeviceCodeFlow(std::string);
+    afx_msg void OnBnClickedCancel();
+    afx_msg void OnBnClickedButtonRequestToken();
+    afx_msg void OnBnClickedButtonLogout();
+    afx_msg void OnBnClickedButtonSubscribeEvent();
 };
 UINT MyThreadFunction(LPVOID pParam);
 
@@ -66,15 +61,15 @@ struct Error {
 
 struct TokenResponse {
     struct ExpiresIn {
-      int secs;
-      int nanos;
+        int secs;
+        int nanos;
     };
 
     std::string access_token;
     std::vector<std::string> scopes;
     struct TokenReceiveTime {
-      int secs;
-      int nanos;
+        int secs;
+        int nanos;
     };
     std::string refresh_token;
     ExpiresIn expires_in;
