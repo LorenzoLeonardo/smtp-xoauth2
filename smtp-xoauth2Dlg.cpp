@@ -323,7 +323,15 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
         }
     } else if (json_data.find("error") != json_data.end()) {
         return JsonType::Error;
-    } else {
+    } else if (json_data.find("event") != json_data.end()) {
+        if (json_data.find("result") != json_data.end()) {
+            json response = json_data.at("result");
+            return JsonType::TokenResponse;
+        } else {
+            return JsonType::Unknown;
+        }
+    }
+    else {
         return JsonType::Unknown;
     }
 }
@@ -360,26 +368,29 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             TokenResponse token;
 
             token.access_token =
-                jsonLogin.at("response").at("access_token").get<std::string>();
+                jsonLogin.at("result").at("access_token").get<std::string>();
             token.refresh_token =
-                jsonLogin.at("response").at("refresh_token").get<std::string>();
-            token.scopes = jsonLogin.at("response")
+                jsonLogin.at("result").at("refresh_token").get<std::string>();
+            token.scopes = jsonLogin.at("result")
                                .at("scopes")
                                .get<std::vector<std::string>>();
             token.expires_in.secs =
-                jsonLogin.at("response").at("expires_in").at("secs").get<int>();
-            token.expires_in.nanos = jsonLogin.at("response")
+                jsonLogin.at("result").at("expires_in").at("secs").get<int>();
+            token.expires_in.nanos = jsonLogin.at("result")
                                          .at("expires_in")
                                          .at("nanos")
                                          .get<int>();
-            token.token_receive_time.secs = jsonLogin.at("response")
+            token.token_receive_time.secs = jsonLogin.at("result")
                                                 .at("token_receive_time")
                                                 .at("secs")
                                                 .get<int>();
-            token.token_receive_time.nanos = jsonLogin.at("response")
+            token.token_receive_time.nanos = jsonLogin.at("result")
                                                  .at("token_receive_time")
                                                  .at("nanos")
                                                  .get<int>();
+
+            _pLoginDialog->ShowWindow(SW_HIDE);
+            _pLoginDialog->UpdateWindow();
         }
         default: {
         }
