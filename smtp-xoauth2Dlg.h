@@ -3,47 +3,13 @@
 //
 
 #pragma once
+#include "CLoginDlg.h"
 #include "OAuth2DeviceCodeFlow.h"
 #include "TcpClient.h"
-// Csmtpxoauth2Dlg dialog
-class Csmtpxoauth2Dlg : public CDialogEx {
-    // Construction
-  public:
-    Csmtpxoauth2Dlg(CWnd *pParent = nullptr); // standard constructor
-    ~Csmtpxoauth2Dlg() { _client.Close(); }
-    void SetTcpClient(TcpClient &client) { _client = client; }
-// Dialog Data
-#ifdef AFX_DESIGN_TIME
-    enum { IDD = IDD_SMTPXOAUTH2_DIALOG };
-#endif
 
-  protected:
-    virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
+#include <nlohmann/json.hpp>
 
-    // Implementation
-  protected:
-    HICON m_hIcon;
-
-    CWinThread *_pThread;
-    // Generated message map functions
-    virtual BOOL OnInitDialog();
-    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-    afx_msg void OnPaint();
-    afx_msg HCURSOR OnQueryDragIcon();
-    DECLARE_MESSAGE_MAP()
-  public:
-    CEdit _editInputArea;
-    afx_msg void OnBnClickedOk();
-    CEdit _editResponseArea;
-    TcpClient _client;
-
-    DeviceCodeFlow generateDeviceCodeFlow(std::string);
-    afx_msg void OnBnClickedCancel();
-    afx_msg void OnBnClickedButtonRequestToken();
-    afx_msg void OnBnClickedButtonLogout();
-    afx_msg void OnBnClickedButtonSubscribeEvent();
-};
-UINT MyThreadFunction(LPVOID pParam);
+using json = nlohmann::json;
 
 enum class JsonType { LoginReply, Error, TokenResponse, Unknown };
 
@@ -76,5 +42,46 @@ struct TokenResponse {
     TokenReceiveTime token_receive_time;
 };
 
-void handleJsonMessages(std::string jsonStr);
-JsonType determineJsonType(const nlohmann::json &json_data);
+// Csmtpxoauth2Dlg dialog
+class Csmtpxoauth2Dlg : public CDialogEx {
+    // Construction
+  public:
+    Csmtpxoauth2Dlg(CWnd *pParent = nullptr); // standard constructor
+    ~Csmtpxoauth2Dlg() { _client.Close(); }
+    void SetTcpClient(TcpClient &client) { _client = client; }
+// Dialog Data
+#ifdef AFX_DESIGN_TIME
+    enum { IDD = IDD_SMTPXOAUTH2_DIALOG };
+#endif
+
+  protected:
+    virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
+
+    // Implementation
+  protected:
+    HICON m_hIcon;
+
+    CWinThread *_pThread;
+    std::unique_ptr<CLoginDlg> _pLoginDialog;
+    // Generated message map functions
+    virtual BOOL OnInitDialog();
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+    DECLARE_MESSAGE_MAP()
+  public:
+    CEdit _editInputArea;
+    afx_msg void OnBnClickedOk();
+    CEdit _editResponseArea;
+    TcpClient _client;
+
+    DeviceCodeFlow generateDeviceCodeFlow(std::string);
+    afx_msg void OnBnClickedCancel();
+    afx_msg void OnBnClickedButtonRequestToken();
+    afx_msg void OnBnClickedButtonLogout();
+    afx_msg void OnBnClickedButtonSubscribeEvent();
+    void handleJsonMessages(std::string jsonStr);
+    JsonType determineJsonType(const nlohmann::json &json_data);
+};
+
+UINT MyThreadFunction(LPVOID pParam);
