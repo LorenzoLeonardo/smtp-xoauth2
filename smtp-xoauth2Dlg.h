@@ -16,6 +16,7 @@ enum class JsonType {
     Error,
     TokenResponse,
     TokenResponseError,
+    ProfileResponse,
     Unknown
 };
 
@@ -53,6 +54,11 @@ struct TokenResponseError {
     std::string error_code;
 };
 
+struct ProfileResponse {
+    std::string sender_name;
+    std::string sender_email;
+};
+
 // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx {
     // Construction
@@ -82,8 +88,9 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     DECLARE_MESSAGE_MAP()
   public:
     CEdit _editInputArea;
-    //    afx_msg void OnBnClickedOk();
     CEdit _editResponseArea;
+    CEdit _ctrlEditSenderName;
+    CEdit _ctrlEditSenderEmail;
     TcpClient _client;
 
     DeviceCodeFlow generateDeviceCodeFlow(std::string);
@@ -96,8 +103,10 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
     TokenResponseError handleTokenResponseError(json jsonLogin);
+    ProfileResponse handleProfileResponse(json jsonProfile);
     afx_msg void OnStnClickedStaticFrom();
     afx_msg void OnBnClickedButtonSend();
+    afx_msg void OnBnClickedButtonProfile();
 };
 
 UINT MyThreadFunction(LPVOID pParam);

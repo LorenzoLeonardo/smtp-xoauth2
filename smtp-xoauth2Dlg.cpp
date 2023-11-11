@@ -3,6 +3,7 @@
 //
 #include "pch.h"
 
+#include "Emailer.h"
 #include "Helpers.h"
 #include "afxdialogex.h"
 #include "framework.h"
@@ -52,6 +53,8 @@ Csmtpxoauth2Dlg::Csmtpxoauth2Dlg(CWnd *pParent /*=nullptr*/)
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_EDIT_OUTPUT, _editResponseArea);
+    DDX_Control(pDX, IDC_EDIT_SENDER_NAME, _ctrlEditSenderName);
+    DDX_Control(pDX, IDC_EDIT_SENDER_EMAIL, _ctrlEditSenderEmail);
 }
 
 BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
@@ -67,6 +70,7 @@ ON_BN_CLICKED(IDC_BUTTON_LOGOUT, &Csmtpxoauth2Dlg::OnBnClickedButtonLogout)
 //               &Csmtpxoauth2Dlg::OnBnClickedButtonSubscribeEvent)
 ON_STN_CLICKED(IDC_STATIC_FROM, &Csmtpxoauth2Dlg::OnStnClickedStaticFrom)
 ON_BN_CLICKED(IDC_BUTTON_SEND, &Csmtpxoauth2Dlg::OnBnClickedButtonSend)
+//ON_BN_CLICKED(IDC_BUTTON_PROFILE, &Csmtpxoauth2Dlg::OnBnClickedButtonProfile)
 END_MESSAGE_MAP()
 
 // Csmtpxoauth2Dlg message handlers
@@ -331,6 +335,8 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
             return JsonType::LoginReply;
         } else if (response.find("access_token") != response.end()) {
             return JsonType::TokenResponse;
+        } else if (response.find("sender_name") != response.end()) {
+            return JsonType::ProfileResponse;
         } else {
             return JsonType::Unknown;
         }
@@ -404,6 +410,13 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             _pLoginDialog->ShowWindow(SW_HIDE);
             _pLoginDialog->UpdateWindow();
             this->EnableWindow(TRUE);
+
+            Profile profile;
+            profile.access_token = token.access_token;
+            profile.profile_endpoint = "https://outlook.office.com/api/v2.0/me";
+
+            std::string request = RequestProfile::toJson(profile);
+            this->_client.Send(request.c_str(), (int)request.length());
             break;
         }
         case JsonType::TokenResponseError: {
@@ -422,6 +435,15 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                               MB_ICONERROR | MB_OK);
                 this->PostMessage(WM_CLOSE);
             }
+            break;
+        }
+        case JsonType::ProfileResponse: {
+            ProfileResponse response;
+            response = handleProfileResponse(jsonLogin);
+            _ctrlEditSenderName.SetWindowText(static_cast<LPCTSTR>(
+                Helpers::Utf8ToCString(response.sender_name)));
+            _ctrlEditSenderEmail.SetWindowText(static_cast<LPCTSTR>(
+                Helpers::Utf8ToCString(response.sender_email)));
             break;
         }
         default: {
@@ -478,6 +500,18 @@ TokenResponseError Csmtpxoauth2Dlg::handleTokenResponseError(json jsonLogin) {
     return error;
 }
 
+ProfileResponse Csmtpxoauth2Dlg::handleProfileResponse(json jsonProfile) {
+    json response;
+
+    if (jsonProfile.find("response") != jsonProfile.end()) {
+        response = jsonProfile.at("response");
+    }
+
+    ProfileResponse profile;
+    profile.sender_name = response.at("sender_name").get<std::string>();
+    profile.sender_email = response.at("sender_email").get<std::string>();
+    return profile;
+}
 void Csmtpxoauth2Dlg::OnStnClickedStaticFrom() {
     // TODO: Add your control notification handler code here
 }
@@ -485,3 +519,40 @@ void Csmtpxoauth2Dlg::OnStnClickedStaticFrom() {
 void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
     // TODO: Add your control notification handler code here
 }
+
+//void Csmtpxoauth2Dlg::OnBnClickedButtonProfile() {
+    // TODO: Add your control notification handler code here
+
+//    Profile profile;
+//    profile.access_token =
+//        "EwBQA+l3BAAUpSDGiWSEqG8SEbhMwx+LVy/"
+//        "3Wu8AAUqS2MIindJ+"
+//        "w4j52NO2DCfVeF42MODRx9jeX7pAAUlnwRKH2gXLFm8uXXGDZ3mmDj4p4DUayAEtlGNrx9"
+//        "Kyb8k3pg5nb+"
+//        "2F0MTge58tiIqiTmsISEmKfKu3R98LEusHzRY6ojGGxOSAE96O3Z2rxlCNwMenQuyYg7N5"
+//        "ohkAL7yoKw/"
+//        "MGG6KBoEPKhlmxfAIk4z+H+"
+//        "Kg7LsZkJkoIPLTyj5I6JC03jVYLT349ENQ7jDdCnd29r6FmynwEkzu2O7npoYTRz945fAN"
+//        "b5jBx/5rEM4RhFZOmzy/mCp8g0/oGRzyGLzAoaa0IiF3/"
+//        "TKM2Tp6Ee8YMFSCnFVclniE5fyhuzoDZgAACBeeECDnMCTxIALWHgh3PMrC630Io19gEs4"
+//        "CP/c8NfRcBPYCYUuRRnKIAHTBL48/u8VvGO/"
+//        "aaoSHqXwTpzoMJyuXPr6vg0KPo+ya4uB26TAm+3Qj4Fy1pn77+"
+//        "MYUfHQ7V8dnNSaMEg5Xa7HzIIZ2ohEEkAfu0PN7GuQ5rhVNcUX+6dOmhbP1rzJtnbNX+"
+//        "uWfbhaQgazUT/"
+//        "thFD7OaX+"
+//        "z2FIFEsp26lpJCUKEchJcUFd3ewZsAFSp0InPLLKnNWu1khJafcVlEd25WMbnkW6p9Kzc3"
+//        "vgeNvr/FIhlArDJmu/"
+//        "iQTs1KBCZJYnXwoJr2hoNT4biS62Y2C7lfPq+rwcg4XXcQ4Cf+"
+//        "crpdKrCdMgpSC9cCYiCPj7rZFv8pfygg+AZaV2oxuhtnga/5y/Nz/"
+//        "4bFZhJWyVLGSiJdF648mMjx8PEOza8fwDrhZYXb/"
+//        "CNayWsWhWyqGUxlC0pNdGCyxoZ2mez82dGBCNTmtp4Ja6Az5dDcrldzToVzgxGr1SYU4ft"
+//        "Y961MEJjpBreJ2VKRatmcmLZ/wScMm41r72OJ4/"
+//        "rSSw3AfSOEWlmJ9GPgTernCsEakALhqrvDIIwutLP3t/jyJ3hnL48Qi2/"
+//        "kr787S3DcMWiAS4KrYsiOU/U30WsMqWrrRT7aVRF013iROSjGtd/pM8kO77O/"
+//        "ONCdYMw0H/j7LEYxh5Bnb0qZM4DM8T1VcKKpv+mZOFJPnjPRcEsl/"
+//        "44Vqh+4MmS4PWdC2o7aAI=";
+//    profile.profile_endpoint = "https://outlook.office.com/api/v2.0/me";
+//
+//    std::string request = RequestProfile::toJson(profile);
+//    this->_client.Send(request.c_str(), (int)request.length());
+//}
