@@ -29,6 +29,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Update Submodules
+      run: |
+        git submodule update --init --recursive
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
