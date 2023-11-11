@@ -330,8 +330,7 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
         } else {
             return JsonType::Unknown;
         }
-    }
-    else {
+    } else {
         return JsonType::Unknown;
     }
 }
@@ -365,29 +364,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             error.error = jsonLogin.at("error").get<std::string>();
         }
         case JsonType::TokenResponse: {
-            TokenResponse token;
-
-            token.access_token =
-                jsonLogin.at("result").at("access_token").get<std::string>();
-            token.refresh_token =
-                jsonLogin.at("result").at("refresh_token").get<std::string>();
-            token.scopes = jsonLogin.at("result")
-                               .at("scopes")
-                               .get<std::vector<std::string>>();
-            token.expires_in.secs =
-                jsonLogin.at("result").at("expires_in").at("secs").get<int>();
-            token.expires_in.nanos = jsonLogin.at("result")
-                                         .at("expires_in")
-                                         .at("nanos")
-                                         .get<int>();
-            token.token_receive_time.secs = jsonLogin.at("result")
-                                                .at("token_receive_time")
-                                                .at("secs")
-                                                .get<int>();
-            token.token_receive_time.nanos = jsonLogin.at("result")
-                                                 .at("token_receive_time")
-                                                 .at("nanos")
-                                                 .get<int>();
+            TokenResponse token = handleTokenResponse(jsonLogin);
 
             _pLoginDialog->ShowWindow(SW_HIDE);
             _pLoginDialog->UpdateWindow();
@@ -399,6 +376,33 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
     }
 }
+
+TokenResponse Csmtpxoauth2Dlg::handleTokenResponse(json jsonLogin) {
+    json response;
+
+    if (jsonLogin.find("response") != jsonLogin.end()) {
+        response = jsonLogin.at("response");
+    } else if (jsonLogin.find("event") != jsonLogin.end()) {
+        if (jsonLogin.find("result") != jsonLogin.end()) {
+            response = jsonLogin.at("result");
+        }
+    }
+
+    TokenResponse token;
+
+    token.access_token = response.at("access_token").get<std::string>();
+    token.refresh_token = response.at("refresh_token").get<std::string>();
+    token.scopes = response.at("scopes").get<std::vector<std::string>>();
+    token.expires_in.secs = response.at("expires_in").at("secs").get<int>();
+    token.expires_in.nanos = response.at("expires_in").at("nanos").get<int>();
+    token.token_receive_time.secs =
+        response.at("token_receive_time").at("secs").get<int>();
+    token.token_receive_time.nanos =
+        response.at("token_receive_time").at("nanos").get<int>();
+
+    return token;
+}
+
 /* void Csmtpxoauth2Dlg::OnBnClickedOk() {
 CString input;
 
@@ -410,15 +414,15 @@ int wideStringLength = input.GetLength();
 WCHAR *narrowStringBuffer = input.GetBuffer(wideStringLength);
 
 int bufferSize =
-    WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer,
-                        wideStringLength,
-                        NULL, 0, NULL, NULL);
+WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer,
+                    wideStringLength,
+                    NULL, 0, NULL, NULL);
 
 std::unique_ptr<char[]> narrowString(new char[bufferSize + 1]);
 std::fill(narrowString.get(), narrowString.get() + bufferSize + 1, '\0');
 
 WideCharToMultiByte(CP_UTF8, 0, narrowStringBuffer, wideStringLength,
-                    narrowString.get(), bufferSize, NULL, NULL);
+                narrowString.get(), bufferSize, NULL, NULL);
 
 int byte_sent = _client.Send(narrowString.get(), bufferSize);
 std::cerr << "Bytes sent: " << byte_sent << std::endl;
