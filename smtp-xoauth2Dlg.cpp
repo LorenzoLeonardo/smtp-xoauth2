@@ -3,13 +3,11 @@
 //
 #include "pch.h"
 
-#include "smtp-xoauth2Dlg.h"
 #include "afxdialogex.h"
 #include "framework.h"
 #include "smtp-xoauth2.h"
-#include <nlohmann/json.hpp>
+#include "smtp-xoauth2Dlg.h"
 
-using json = nlohmann::json;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -96,6 +94,8 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     SetIcon(m_hIcon, TRUE);  // Set big icon
     SetIcon(m_hIcon, FALSE); // Set small icon
 
+    _pLoginDialog = std::make_unique<CLoginDlg>(this);
+    _pLoginDialog->Create(IDD_DIALOG_LOGIN, this);
     // TODO: Add extra initialization here
     _pThread = AfxBeginThread(MyThreadFunction, this, THREAD_PRIORITY_NORMAL, 0,
                               0, nullptr);
@@ -168,6 +168,12 @@ DeviceCodeFlow Csmtpxoauth2Dlg::generateDeviceCodeFlow(std::string method) {
 void Csmtpxoauth2Dlg::OnBnClickedOk() {
     DeviceCodeFlow flow = generateDeviceCodeFlow("login");
 
+    json listen_event = {{"event_name", "oauth2"}};
+    std::string jsonString = listen_event.dump();
+    size_t byte_sent =
+        _client.Send(jsonString.c_str(), (int)jsonString.length());
+    std::cerr << "Bytes sent: " << byte_sent << std::endl;
+
     json flowJson = {
         {"object", flow.object},
         {"method", flow.method},
@@ -180,10 +186,11 @@ void Csmtpxoauth2Dlg::OnBnClickedOk() {
           {"device_auth_endpoint", flow.param.device_auth_endpoint},
           {"client_id", flow.param.client_id}}}};
 
-    std::string jsonString = flowJson.dump();
+    jsonString = flowJson.dump();
 
-    size_t byte_sent =
-        _client.Send(jsonString.c_str(), (int)jsonString.length());
+    _pLoginDialog->ShowWindow(SW_SHOW);
+    _pLoginDialog->UpdateWindow();
+    byte_sent = _client.Send(jsonString.c_str(), (int)jsonString.length());
     std::cerr << "Bytes sent: " << byte_sent << std::endl;
 }
 
@@ -275,7 +282,7 @@ UINT MyThreadFunction(LPVOID pParam) {
         if (bytes_read != SOCKET_ERROR) {
 
             std::string jsonStr(buffer.get(), bytes_read);
-            handleJsonMessages(jsonStr);
+            dlg->handleJsonMessages(jsonStr);
 
             // Calculate the required buffer size for the wide
             // character string
@@ -304,7 +311,7 @@ UINT MyThreadFunction(LPVOID pParam) {
     return 0; // Return the thread exit code
 }
 
-JsonType determineJsonType(const nlohmann::json &json_data) {
+JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
     if (json_data.find("response") != json_data.end()) {
         json response = json_data.at("response");
         if (response.find("device_code") != response.end()) {
@@ -321,7 +328,7 @@ JsonType determineJsonType(const nlohmann::json &json_data) {
     }
 }
 
-void handleJsonMessages(std::string jsonStr) {
+void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
     json jsonLogin = nlohmann::json::parse(jsonStr);
 
     JsonType jType = determineJsonType(jsonLogin);
@@ -341,6 +348,8 @@ void handleJsonMessages(std::string jsonStr) {
                                          .get<std::string>();
             login.expires_in =
                 jsonLogin.at("response").at("expires_in").get<int>();
+            _pLoginDialog->SetUrl(login.verification_uri);
+            _pLoginDialog->SetUserCode(login.user_code);
         }
         case JsonType::Error: {
             Error error;
