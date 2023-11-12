@@ -65,6 +65,30 @@ void CLoginDlg::OnCancel() {
 }
 
 void CLoginDlg::OnEnSetfocusEditUserCode() {
-    // TODO: Add your control notification handler code here
-    //_ctrlEditUserCode.SetSel(0, -1);
+    CString selectedText;
+
+    // Get the text from the edit control
+    _ctrlEditUserCode.GetWindowText(selectedText);
+
+    if (!selectedText.IsEmpty()) {
+        // Set the selection to the entire text
+        _ctrlEditUserCode.SetSel(0, -1);
+        // Copy the selected text to the clipboard
+        if (::OpenClipboard(m_hWnd)) {
+            ::EmptyClipboard();
+            HGLOBAL hClipboardData = ::GlobalAlloc(
+                GMEM_DDESHARE, (selectedText.GetLength() + 1) * sizeof(TCHAR));
+            if (hClipboardData != nullptr) {
+                LPTSTR pchData =
+                    static_cast<LPTSTR>(::GlobalLock(hClipboardData));
+                if (pchData != nullptr) {
+                    _tcscpy_s(pchData, selectedText.GetLength() + 1,
+                              selectedText);
+                }
+                ::GlobalUnlock(hClipboardData);
+                ::SetClipboardData(CF_UNICODETEXT, hClipboardData);
+            }
+            ::CloseClipboard();
+        }
+    }
 }
