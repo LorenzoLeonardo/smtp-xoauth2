@@ -1,5 +1,6 @@
 .vs/
 emailer-service.exe
 ipc_server.exe
+ipc-server.exe
 modern-auth-service.exe
 x64/

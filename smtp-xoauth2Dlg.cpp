@@ -70,7 +70,7 @@ ON_BN_CLICKED(IDC_BUTTON_LOGOUT, &Csmtpxoauth2Dlg::OnBnClickedButtonLogout)
 //               &Csmtpxoauth2Dlg::OnBnClickedButtonSubscribeEvent)
 ON_STN_CLICKED(IDC_STATIC_FROM, &Csmtpxoauth2Dlg::OnStnClickedStaticFrom)
 ON_BN_CLICKED(IDC_BUTTON_SEND, &Csmtpxoauth2Dlg::OnBnClickedButtonSend)
-//ON_BN_CLICKED(IDC_BUTTON_PROFILE, &Csmtpxoauth2Dlg::OnBnClickedButtonProfile)
+// ON_BN_CLICKED(IDC_BUTTON_PROFILE, &Csmtpxoauth2Dlg::OnBnClickedButtonProfile)
 END_MESSAGE_MAP()
 
 // Csmtpxoauth2Dlg message handlers
@@ -337,6 +337,8 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
             return JsonType::TokenResponse;
         } else if (response.find("sender_name") != response.end()) {
             return JsonType::ProfileResponse;
+        } else if (json_data.at("response").get<bool>() == true) {
+            return JsonType::LogoutResponse;
         } else {
             return JsonType::Unknown;
         }
@@ -446,6 +448,15 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 Helpers::Utf8ToCString(response.sender_email)));
             break;
         }
+        case JsonType::LogoutResponse: {
+            bool response = false;
+
+            response = jsonLogin.at("response").get<bool>();
+            if (response) {
+                login();
+            }
+            break;
+        }
         default: {
             break;
         }
@@ -520,8 +531,8 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
     // TODO: Add your control notification handler code here
 }
 
-//void Csmtpxoauth2Dlg::OnBnClickedButtonProfile() {
-    // TODO: Add your control notification handler code here
+// void Csmtpxoauth2Dlg::OnBnClickedButtonProfile() {
+//  TODO: Add your control notification handler code here
 
 //    Profile profile;
 //    profile.access_token =
