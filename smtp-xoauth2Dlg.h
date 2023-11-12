@@ -17,6 +17,7 @@ enum class JsonType {
     TokenResponse,
     TokenResponseError,
     ProfileResponse,
+    LogoutResponse,
     Unknown
 };
 
@@ -59,6 +60,9 @@ struct ProfileResponse {
     std::string sender_email;
 };
 
+struct LogoutResponse {
+    bool response;
+};
 // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx {
     // Construction
