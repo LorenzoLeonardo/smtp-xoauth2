@@ -86,7 +86,7 @@ BOOL Csmtpxoauth2App::InitInstance() {
         AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
         return FALSE;
     }
-    auto result = LaunchProcess(_T("ipc_server.exe"));
+    auto result = LaunchProcess(_T("ipc-server.exe"));
     if (result.has_value()) {
         _processInfo.push_back(result.value());
     } else {
