@@ -14,3 +14,23 @@ std::string RequestProfile::toJson(Profile request) {
 
     return flowJson.dump();
 }
+
+std::string Emailer::toJson(EmailInfo info) {
+
+    json flowJson = {
+        {"object", "applications.email"},
+        {"method", "sendMail"},
+        {"param",
+         {{"access_token", info.access_token},
+          {"recipients",
+           {{{"name", info.recipients[0].name},
+             {"email", info.recipients[0].email}}}},
+          {"sender",
+           {{"name", info.sender.name}, {"email", info.sender.email}}},
+          {"smtp_port", info.smtp_port},
+          {"smtp_server", info.smtp_server},
+          {"subject", info.subject},
+          {"text_body", info.text_body}}}};
+
+    return flowJson.dump();
+}

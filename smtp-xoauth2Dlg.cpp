@@ -55,6 +55,9 @@ void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
     DDX_Control(pDX, IDC_EDIT_OUTPUT, _editResponseArea);
     DDX_Control(pDX, IDC_EDIT_SENDER_NAME, _ctrlEditSenderName);
     DDX_Control(pDX, IDC_EDIT_SENDER_EMAIL, _ctrlEditSenderEmail);
+    DDX_Control(pDX, IDC_EDIT_RECIPIENTS, _ctrlEditRecipients);
+    DDX_Control(pDX, IDC_EDIT_SUBJECT, _ctrlEditSubject);
+    DDX_Control(pDX, IDC_EDIT_BODY, _ctrlEditBody);
 }
 
 BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
@@ -337,8 +340,10 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
             return JsonType::TokenResponse;
         } else if (response.find("sender_name") != response.end()) {
             return JsonType::ProfileResponse;
-        } else if (json_data.at("response").get<bool>() == true) {
+        } else if (json_data.at("response").is_boolean()) {
             return JsonType::LogoutResponse;
+        } else if (json_data.at("response").is_string()) {
+            return JsonType::EmailResponse;
         } else {
             return JsonType::Unknown;
         }
@@ -418,6 +423,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             profile.profile_endpoint = "https://outlook.office.com/api/v2.0/me";
 
             std::string request = RequestProfile::toJson(profile);
+            this->access_token = profile.access_token;
             this->_client.Send(request.c_str(), (int)request.length());
             break;
         }
@@ -446,6 +452,10 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 Helpers::Utf8ToCString(response.sender_name)));
             _ctrlEditSenderEmail.SetWindowText(static_cast<LPCTSTR>(
                 Helpers::Utf8ToCString(response.sender_email)));
+
+            this->sender_email = response.sender_email;
+            this->sender_name = response.sender_name;
+
             break;
         }
         case JsonType::LogoutResponse: {
@@ -454,6 +464,14 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             response = jsonLogin.at("response").get<bool>();
             if (response) {
                 login();
+            }
+            break;
+        }
+        case JsonType::EmailResponse: {
+            std::string response = jsonLogin.at("response").get<std::string>();
+            if (response == "success") {
+                AfxMessageBox(_T("The E-mail was successfully sent!"),
+                              MB_ICONINFORMATION | MB_OK);
             }
             break;
         }
@@ -528,6 +546,27 @@ void Csmtpxoauth2Dlg::OnStnClickedStaticFrom() {
 }
 
 void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
+
+    EmailInfo info;
+
+    info.access_token = this->access_token;
+    info.smtp_port = 587;
+    info.smtp_server = "smtp.office365.com";
+    info.sender = {this->sender_name, this->sender_email};
+
+    CString recipient, subject, body;
+    _ctrlEditRecipients.GetWindowText(recipient);
+    _ctrlEditSubject.GetWindowText(subject);
+    _ctrlEditBody.GetWindowText(body);
+
+    info.subject = Helpers::CStringToUtf8(subject);
+    info.text_body = Helpers::CStringToUtf8(body);
+
+    info.recipients = {
+        {Helpers::CStringToUtf8(recipient), Helpers::CStringToUtf8(recipient)}};
+
+    std::string data = Emailer::toJson(info);
+    _client.Send(data.c_str(), (int)data.length());
     // TODO: Add your control notification handler code here
 }
 
