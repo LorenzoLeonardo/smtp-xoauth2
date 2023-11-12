@@ -18,6 +18,7 @@ enum class JsonType {
     TokenResponseError,
     ProfileResponse,
     LogoutResponse,
+    EmailResponse,
     Unknown
 };
 
@@ -63,6 +64,11 @@ struct ProfileResponse {
 struct LogoutResponse {
     bool response;
 };
+
+struct EmailResponse {
+    std::string response;
+};
+
 // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx {
     // Construction
@@ -81,6 +87,9 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     // Implementation
   protected:
     HICON m_hIcon;
+    std::string access_token;
+    std::string sender_name;
+    std::string sender_email;
 
     CWinThread *_pThread;
     std::unique_ptr<CLoginDlg> _pLoginDialog;
@@ -95,6 +104,10 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     CEdit _editResponseArea;
     CEdit _ctrlEditSenderName;
     CEdit _ctrlEditSenderEmail;
+    CEdit _ctrlEditRecipients;
+    CEdit _ctrlEditSubject;
+    CEdit _ctrlEditBody;
+
     TcpClient _client;
 
     DeviceCodeFlow generateDeviceCodeFlow(std::string);
