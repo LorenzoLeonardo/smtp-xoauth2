@@ -6,7 +6,7 @@ This is a sample Application that marries C++ and Rust into one ecosystem with J
 
 - ipc-server: https://github.com/LorenzoLeonardo/ipc-server
 - modern-auth-service: https://github.com/LorenzoLeonardo/modern-auth-service
-- emailer-service: (Upcoming development)
+- emailer-service: https://github.com/LorenzoLeonardo/emailer-service
 
 
 ![smtp-xoauth2](https://github.com/LorenzoLeonardo/smtp-xoauth2/assets/97872577/009b4bcf-183c-4d79-b8c8-371f06f22228)
