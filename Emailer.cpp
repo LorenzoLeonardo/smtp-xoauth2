@@ -15,22 +15,30 @@ std::string RequestProfile::toJson(Profile request) {
     return flowJson.dump();
 }
 
-std::string Emailer::toJson(EmailInfo info) {
+std::string Emailer::toJson(EmailInfo email) {
 
-    json flowJson = {
-        {"object", "applications.email"},
-        {"method", "sendMail"},
-        {"param",
-         {{"access_token", info.access_token},
-          {"recipients",
-           {{{"name", info.recipients[0].name},
-             {"email", info.recipients[0].email}}}},
-          {"sender",
-           {{"name", info.sender.name}, {"email", info.sender.email}}},
-          {"smtp_port", info.smtp_port},
-          {"smtp_server", info.smtp_server},
-          {"subject", info.subject},
-          {"text_body", info.text_body}}}};
+    // Convert the email structure to JSON
+    json emailJson;
+    emailJson["smtp_server"] = email.smtp_server;
+    emailJson["smtp_port"] = email.smtp_port;
+    emailJson["sender"] = {{"name", email.sender.name},
+                           {"email", email.sender.email}};
+
+    // Convert recipients to JSON array
+    json recipientsJson;
+    for (const auto &recipient : email.recipients) {
+        recipientsJson.push_back(
+            {{"name", recipient.name}, {"email", recipient.email}});
+    }
+    emailJson["recipients"] = recipientsJson;
+    emailJson["subject"] = email.subject;
+    emailJson["text_body"] = email.text_body;
+    emailJson["access_token"] = email.access_token;
+
+    json flowJson;
+    flowJson["object"] = "applications.email";
+    flowJson["method"] = "sendMail";
+    flowJson["param"] = emailJson;
 
     return flowJson.dump();
 }
