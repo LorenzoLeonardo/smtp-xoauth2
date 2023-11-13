@@ -147,11 +147,16 @@ BOOL Csmtpxoauth2App::InitInstance() {
 
         return FALSE;
     }
+    std::string stream = OAuth2DeviceCodeFlow::subscribeToEvent();
+    client.Send(stream.c_str(), (int)stream.length());
+
     Csmtpxoauth2Dlg dlg;
     dlg.SetTcpClient(client);
     m_pMainWnd = &dlg;
 
     INT_PTR nResponse = dlg.DoModal();
+
+    dlg._pThread->ResumeThread();
     if (nResponse == IDOK) {
         // TODO: Place code here to handle when the dialog is
         //  dismissed with OK

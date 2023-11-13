@@ -2,6 +2,8 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 
+using json = nlohmann::json;
+
 struct DeviceCodeFlow {
     std::string object;
     std::string method;
@@ -16,3 +18,12 @@ struct DeviceCodeFlow {
         std::optional<std::string> client_secret;
     } param;
 };
+namespace OAuth2DeviceCodeFlow {
+DeviceCodeFlow generateDeviceCodeFlow(std::string method);
+std::string login();
+std::string requestToken();
+std::string logout();
+std::string subscribeToEvent();
+std::string cancel();
+std::string toJson(DeviceCodeFlow login);
+}; // namespace OAuth2DeviceCodeFlow

@@ -90,8 +90,6 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     std::string access_token;
     std::string sender_name;
     std::string sender_email;
-
-    CWinThread *_pThread;
     std::unique_ptr<CLoginDlg> _pLoginDialog;
     // Generated message map functions
     virtual BOOL OnInitDialog();
@@ -109,21 +107,23 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     CEdit _ctrlEditBody;
 
     TcpClient _client;
-
-    DeviceCodeFlow generateDeviceCodeFlow(std::string);
+    CWinThread *_pThread;
+    bool _flagCancelled;
     void login();
     void requestToken();
-    afx_msg void OnBnClickedButtonRequestToken();
-    afx_msg void OnBnClickedButtonLogout();
-    //    afx_msg void OnBnClickedButtonSubscribeEvent();
     void handleJsonMessages(std::string jsonStr);
+
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
     TokenResponseError handleTokenResponseError(json jsonLogin);
     ProfileResponse handleProfileResponse(json jsonProfile);
+
     afx_msg void OnStnClickedStaticFrom();
     afx_msg void OnBnClickedButtonSend();
     afx_msg void OnBnClickedButtonProfile();
+    afx_msg void OnBnClickedButtonLogout();
+    afx_msg void OnBnClickedCancel();
+    //    afx_msg void OnClose();
 };
 
 UINT MyThreadFunction(LPVOID pParam);

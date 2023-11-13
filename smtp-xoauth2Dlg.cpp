@@ -64,16 +64,10 @@ BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
 ON_WM_SYSCOMMAND()
 ON_WM_PAINT()
 ON_WM_QUERYDRAGICON()
-// ON_BN_CLICKED(IDOK, &Csmtpxoauth2Dlg::OnBnClickedOk)
-// ON_BN_CLICKED(IDCANCEL, &Csmtpxoauth2Dlg::OnBnClickedCancel)
-ON_BN_CLICKED(IDC_BUTTON_REQUEST_TOKEN,
-              &Csmtpxoauth2Dlg::OnBnClickedButtonRequestToken)
+ON_BN_CLICKED(IDCANCEL, &Csmtpxoauth2Dlg::OnBnClickedCancel)
 ON_BN_CLICKED(IDC_BUTTON_LOGOUT, &Csmtpxoauth2Dlg::OnBnClickedButtonLogout)
-// ON_BN_CLICKED(IDC_BUTTON_SUBSCRIBE_EVENT,
-//               &Csmtpxoauth2Dlg::OnBnClickedButtonSubscribeEvent)
 ON_STN_CLICKED(IDC_STATIC_FROM, &Csmtpxoauth2Dlg::OnStnClickedStaticFrom)
 ON_BN_CLICKED(IDC_BUTTON_SEND, &Csmtpxoauth2Dlg::OnBnClickedButtonSend)
-// ON_BN_CLICKED(IDC_BUTTON_PROFILE, &Csmtpxoauth2Dlg::OnBnClickedButtonProfile)
 END_MESSAGE_MAP()
 
 // Csmtpxoauth2Dlg message handlers
@@ -98,7 +92,7 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
             pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
         }
     }
-
+    _flagCancelled = false;
     // Set the icon for this dialog.  The framework does this automatically
     //  when the application's main window is not a dialog
     SetIcon(m_hIcon, TRUE);  // Set big icon
@@ -154,156 +148,31 @@ HCURSOR Csmtpxoauth2Dlg::OnQueryDragIcon() {
     return static_cast<HCURSOR>(m_hIcon);
 }
 
-DeviceCodeFlow Csmtpxoauth2Dlg::generateDeviceCodeFlow(std::string method) {
-    DeviceCodeFlow flow;
-
-    flow.object = "oauth2.device.code.flow";
-    flow.method = method;
-    flow.param.authorization_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
-    flow.param.device_auth_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode";
-    flow.param.token_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-    flow.param.client_id = "64c5d510-4b7e-4a18-8869-89778461c266";
-    flow.param.process = "smtp-xoauth2";
-    flow.param.provider = "Microsoft";
-    flow.param.scopes.push_back("offline_access");
-    flow.param.scopes.push_back("https://outlook.office.com/SMTP.Send");
-    flow.param.scopes.push_back("https://outlook.office.com/User.Read");
-
-    return flow;
-}
-
 void Csmtpxoauth2Dlg::login() {
     this->EnableWindow(FALSE);
-    DeviceCodeFlow flow = generateDeviceCodeFlow("login");
 
-    json listen_event = {{"event_name", "oauth2"}};
-    std::string jsonString = listen_event.dump();
+    std::string jsonString = OAuth2DeviceCodeFlow::login();
+
     size_t byte_sent =
         _client.Send(jsonString.c_str(), (int)jsonString.length());
-    std::cerr << "Bytes sent: " << byte_sent << std::endl;
-
-    json flowJson = {
-        {"object", flow.object},
-        {"method", flow.method},
-        {"param",
-         {{"process", flow.param.process},
-          {"provider", flow.param.provider},
-          {"scopes", flow.param.scopes},
-          {"authorization_endpoint", flow.param.authorization_endpoint},
-          {"token_endpoint", flow.param.token_endpoint},
-          {"device_auth_endpoint", flow.param.device_auth_endpoint},
-          {"client_id", flow.param.client_id}}}};
-
-    jsonString = flowJson.dump();
 
     _pLoginDialog->ShowWindow(SW_SHOW);
     _pLoginDialog->UpdateWindow();
-    byte_sent = _client.Send(jsonString.c_str(), (int)jsonString.length());
-    std::cerr << "Bytes sent: " << byte_sent << std::endl;
 }
 
 void Csmtpxoauth2Dlg::requestToken() {
-    DeviceCodeFlow flow = generateDeviceCodeFlow("requestToken");
-
-    json flowJson = {
-        {"object", flow.object},
-        {"method", flow.method},
-        {"param",
-         {{"process", flow.param.process},
-          {"provider", flow.param.provider},
-          {"scopes", flow.param.scopes},
-          {"authorization_endpoint", flow.param.authorization_endpoint},
-          {"token_endpoint", flow.param.token_endpoint},
-          {"device_auth_endpoint", flow.param.device_auth_endpoint},
-          {"client_id", flow.param.client_id}}}};
-
-    std::string jsonString = flowJson.dump();
+    std::string jsonString = OAuth2DeviceCodeFlow::requestToken();
 
     size_t byte_sent =
         _client.Send(jsonString.c_str(), (int)jsonString.length());
-}
-
-// void Csmtpxoauth2Dlg::OnBnClickedCancel() {
-//     DeviceCodeFlow flow = generateDeviceCodeFlow("cancel");
-//
-//     json flowJson = {
-//         {"object", flow.object},
-//         {"method", flow.method},
-//         {"param",
-//          {{"process", flow.param.process},
-//           {"provider", flow.param.provider},
-//           {"scopes", flow.param.scopes},
-//           {"authorization_endpoint", flow.param.authorization_endpoint},
-//           {"token_endpoint", flow.param.token_endpoint},
-//           {"device_auth_endpoint", flow.param.device_auth_endpoint},
-//           {"client_id", flow.param.client_id}}}};
-//
-//     std::string jsonString = flowJson.dump();
-//
-//     size_t byte_sent =
-//         _client.Send(jsonString.c_str(), (int)jsonString.length());
-//     std::cerr << "Bytes sent: " << byte_sent << std::endl;
-//     CDialogEx::OnCancel();
-// }
-
-void Csmtpxoauth2Dlg::OnBnClickedButtonRequestToken() {
-    DeviceCodeFlow flow = generateDeviceCodeFlow("requestToken");
-
-    json flowJson = {
-        {"object", flow.object},
-        {"method", flow.method},
-        {"param",
-         {{"process", flow.param.process},
-          {"provider", flow.param.provider},
-          {"scopes", flow.param.scopes},
-          {"authorization_endpoint", flow.param.authorization_endpoint},
-          {"token_endpoint", flow.param.token_endpoint},
-          {"device_auth_endpoint", flow.param.device_auth_endpoint},
-          {"client_id", flow.param.client_id}}}};
-
-    std::string jsonString = flowJson.dump();
-
-    size_t byte_sent =
-        _client.Send(jsonString.c_str(), (int)jsonString.length());
-    std::cerr << "Bytes sent: " << byte_sent << std::endl;
 }
 
 void Csmtpxoauth2Dlg::OnBnClickedButtonLogout() {
-    DeviceCodeFlow flow = generateDeviceCodeFlow("logout");
-
-    json flowJson = {
-        {"object", flow.object},
-        {"method", flow.method},
-        {"param",
-         {{"process", flow.param.process},
-          {"provider", flow.param.provider},
-          {"scopes", flow.param.scopes},
-          {"authorization_endpoint", flow.param.authorization_endpoint},
-          {"token_endpoint", flow.param.token_endpoint},
-          {"device_auth_endpoint", flow.param.device_auth_endpoint},
-          {"client_id", flow.param.client_id}}}};
-
-    std::string jsonString = flowJson.dump();
+    std::string jsonString = OAuth2DeviceCodeFlow::logout();
 
     size_t byte_sent =
         _client.Send(jsonString.c_str(), (int)jsonString.length());
-    std::cerr << "Bytes sent: " << byte_sent << std::endl;
 }
-
-// void Csmtpxoauth2Dlg::OnBnClickedButtonSubscribeEvent() {
-//  TODO: Add your control notification handler code here
-
-//    json flowJson = {{"event_name", "oauth2"}};
-//
-//    std::string jsonString = flowJson.dump();
-//
-//    size_t byte_sent =
-//        _client.Send(jsonString.c_str(), (int)jsonString.length());
-//    std::cerr << "Bytes sent: " << byte_sent << std::endl;
-//}
 
 UINT MyThreadFunction(LPVOID pParam) {
     // Your thread logic here
@@ -312,7 +181,7 @@ UINT MyThreadFunction(LPVOID pParam) {
         char buffer[UINT16_MAX] = {};
 
         int bytes_read = dlg->_client.Receive(buffer, UINT16_MAX);
-        if (bytes_read != SOCKET_ERROR) {
+        if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
 
             std::string jsonStr(buffer, bytes_read);
             dlg->handleJsonMessages(jsonStr);
@@ -568,4 +437,16 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
     std::string data = Emailer::toJson(info);
     _client.Send(data.c_str(), (int)data.length());
     // TODO: Add your control notification handler code here
+}
+
+void Csmtpxoauth2Dlg::OnBnClickedCancel() {
+    _pThread->SuspendThread();
+    std::string jsonString = OAuth2DeviceCodeFlow::cancel();
+
+    size_t byte_sent =
+        _client.Send(jsonString.c_str(), (int)jsonString.length());
+
+    _flagCancelled = true;
+
+    CDialogEx::OnCancel();
 }

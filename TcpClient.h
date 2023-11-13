@@ -18,6 +18,8 @@ class TcpClient {
 
     int Receive(char *buffer, int length);
 
+    int Shutdown();
+
     void Close();
 
   private:

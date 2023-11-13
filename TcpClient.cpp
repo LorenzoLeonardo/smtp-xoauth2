@@ -73,3 +73,5 @@ int TcpClient::Receive(char *buffer, int length) {
     }
     return bytesRead;
 }
+
+int TcpClient::Shutdown() { return closesocket(_clientSocket); }
