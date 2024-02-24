@@ -305,19 +305,27 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 static_cast<LPCTSTR>(Helpers::Utf8ToCString(token.error_code));
             CString error = _T("Error Code: ") + code + _T("\r\n\r\n") + desc;
 
-            _pLoginDialog->ShowWindow(SW_HIDE);
-            _pLoginDialog->UpdateWindow();
-
-            if (CWnd *pWnd = AfxGetMainWnd()) {
-                pWnd->MessageBox(error, code, MB_ICONERROR | MB_OK);
-            }
-
             if (token.error_code == "no_token" ||
                 token.error_code == "expired_token" ||
                 token.error_code == "invalid_grant" ||
                 token.error_code == "authorization_declined") {
+                _pLoginDialog->ShowWindow(SW_HIDE);
+                _pLoginDialog->UpdateWindow();
+
+                if (CWnd *pWnd = AfxGetMainWnd()) {
+                    pWnd->MessageBox(error, code, MB_ICONERROR | MB_OK);
+                }
                 login();
+            } else if (token.error_code == "authorization_pending" ||
+                       token.error_code == "slow_down") {
+                _pLoginDialog->SetErrorNotice(Helpers::CStringToUtf8(error));
             } else {
+                _pLoginDialog->ShowWindow(SW_HIDE);
+                _pLoginDialog->UpdateWindow();
+
+                if (CWnd *pWnd = AfxGetMainWnd()) {
+                    pWnd->MessageBox(error, code, MB_ICONERROR | MB_OK);
+                }
                 this->PostMessage(WM_CLOSE);
             }
             break;
