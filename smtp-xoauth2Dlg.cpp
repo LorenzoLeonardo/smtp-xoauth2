@@ -301,10 +301,16 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
 
             if (token.error_code == "no_token" ||
                 token.error_code == "expired_token" ||
-                token.error_code == "invalid_grant") {
+                token.error_code == "invalid_grant" ||
+                token.error_code == "authorization_declined") {
+
+                _pLoginDialog->ShowWindow(SW_HIDE);
+                _pLoginDialog->UpdateWindow();
+                AfxMessageBox(static_cast<LPCTSTR>(Helpers::Utf8ToCString(
+                                  token.error_code_desc)),
+                              MB_ICONERROR | MB_OK);
                 login();
             } else {
-
                 _pLoginDialog->ShowWindow(SW_HIDE);
                 _pLoginDialog->UpdateWindow();
                 AfxMessageBox(static_cast<LPCTSTR>(Helpers::Utf8ToCString(
