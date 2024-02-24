@@ -86,27 +86,6 @@ BOOL Csmtpxoauth2App::InitInstance() {
         AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
         return FALSE;
     }
-    auto result = LaunchProcess(_T("ipc-server.exe"));
-    if (result.has_value()) {
-        _processInfo.push_back(result.value());
-    } else {
-        Cleanup(_processInfo);
-        return FALSE;
-    }
-    result = LaunchProcess(_T("modern-auth-service.exe"));
-    if (result.has_value()) {
-        _processInfo.push_back(result.value());
-    } else {
-        Cleanup(_processInfo);
-        return FALSE;
-    }
-    result = LaunchProcess(_T("emailer-service.exe"));
-    if (result.has_value()) {
-        _processInfo.push_back(result.value());
-    } else {
-        Cleanup(_processInfo);
-        return FALSE;
-    }
 
     // Create the shell manager, in case the dialog contains
     // any shell tree view or shell list view controls.
