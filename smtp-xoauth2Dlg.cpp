@@ -299,23 +299,25 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         case JsonType::TokenResponseError: {
             TokenResponseError token = handleTokenResponseError(jsonLogin);
 
+            CString desc = static_cast<LPCTSTR>(
+                Helpers::Utf8ToCString(token.error_code_desc));
+            CString code =
+                static_cast<LPCTSTR>(Helpers::Utf8ToCString(token.error_code));
+            CString error = _T("Error Code: ") + code + _T("\r\n\r\n") + desc;
+
+            _pLoginDialog->ShowWindow(SW_HIDE);
+            _pLoginDialog->UpdateWindow();
+
+            if (CWnd *pWnd = AfxGetMainWnd()) {
+                pWnd->MessageBox(error, code, MB_ICONERROR | MB_OK);
+            }
+
             if (token.error_code == "no_token" ||
                 token.error_code == "expired_token" ||
                 token.error_code == "invalid_grant" ||
                 token.error_code == "authorization_declined") {
-
-                _pLoginDialog->ShowWindow(SW_HIDE);
-                _pLoginDialog->UpdateWindow();
-                AfxMessageBox(static_cast<LPCTSTR>(Helpers::Utf8ToCString(
-                                  token.error_code_desc)),
-                              MB_ICONERROR | MB_OK);
                 login();
             } else {
-                _pLoginDialog->ShowWindow(SW_HIDE);
-                _pLoginDialog->UpdateWindow();
-                AfxMessageBox(static_cast<LPCTSTR>(Helpers::Utf8ToCString(
-                                  token.error_code_desc)),
-                              MB_ICONERROR | MB_OK);
                 this->PostMessage(WM_CLOSE);
             }
             break;
