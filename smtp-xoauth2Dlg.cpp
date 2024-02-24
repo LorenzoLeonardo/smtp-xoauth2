@@ -226,7 +226,7 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
             } else if (response.find("access_token") != response.end()) {
                 return JsonType::TokenResponse;
             } else {
-                return JsonType::Unknown;
+                return JsonType::DeviceCodeFlowResponse;
             }
         } else if (json_data.find("error") != json_data.end()) {
             return JsonType::Error;
@@ -342,6 +342,11 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 AfxMessageBox(_T("The E-mail was successfully sent!"),
                               MB_ICONINFORMATION | MB_OK);
             }
+            break;
+        }
+        case JsonType::DeviceCodeFlowResponse: {
+            DeviceCodeFlowResponse response =
+                OAuth2DeviceCodeFlow::toDeviceCodeFlowResponse(jsonLogin);
             break;
         }
         default: {

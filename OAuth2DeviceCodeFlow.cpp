@@ -56,3 +56,25 @@ std::string OAuth2DeviceCodeFlow::subscribeToEvent() {
 std::string OAuth2DeviceCodeFlow::cancel() {
     return toJson(generateDeviceCodeFlow("cancel"));
 }
+
+DeviceCodeFlowResponse
+OAuth2DeviceCodeFlow::toDeviceCodeFlowResponse(json jsonLogin) {
+
+    json response = jsonLogin.at("result");
+    json json_response = nlohmann::json::parse(response.get<std::string>());
+
+    DeviceCodeFlowResponse dev_response;
+
+    dev_response.error = json_response.at("error").get<std::string>();
+    dev_response.error_description =
+        json_response.at("error_description").get<std::string>();
+    dev_response.error_codes =
+        json_response.at("error_codes").get<std::vector<int>>();
+    dev_response.timestamp = json_response.at("timestamp").get<std::string>();
+    dev_response.trace_id = json_response.at("trace_id").get<std::string>();
+    dev_response.correlation_id =
+        json_response.at("correlation_id").get<std::string>();
+    dev_response.error_uri = json_response.at("error_uri").get<std::string>();
+
+    return dev_response;
+}

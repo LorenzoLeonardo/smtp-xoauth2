@@ -19,6 +19,7 @@ enum class JsonType {
     ProfileResponse,
     LogoutResponse,
     EmailResponse,
+    DeviceCodeFlowResponse,
     Unknown
 };
 
