@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace Helpers {
 std::string Utf8ToAnsi(const std::string &utf8Str);
@@ -8,5 +9,5 @@ std::string AnsiToUtf8(const std::string &ansiStr);
 
 CStringW Utf8ToCString(const std::string &utf8Str);
 std::string CStringToUtf8(const CStringW &cstr);
-
+std::vector<unsigned char> string_to_vec(std::string str);
 }; // namespace Helpers

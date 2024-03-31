@@ -2,7 +2,6 @@
 
 #include "Helpers.h"
 #include <atlstr.h>
-#include <string>
 
 std::string Helpers::Utf8ToAnsi(const std::string &utf8Str) {
     // Convert UTF-8 to ANSI
@@ -70,4 +69,14 @@ std::string Helpers::CStringToUtf8(const CStringW &cstr) {
     utf8Str.erase(std::remove(utf8Str.begin(), utf8Str.end(), '\0'),
                   utf8Str.end());
     return utf8Str;
+}
+
+std::vector<unsigned char> Helpers::string_to_vec(std::string str) {
+    std::vector<unsigned char> bytes;
+
+    // Convert string to vector of bytes
+    for (char c : str) {
+        bytes.push_back(static_cast<unsigned char>(c));
+    }
+    return bytes;
 }

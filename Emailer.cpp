@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Emailer.h"
+#include "Helpers.h"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -11,8 +12,10 @@ std::string RequestProfile::toJson(Profile request) {
                      {"param",
                       {{"access_token", request.access_token},
                        {"profile_endpoint", request.profile_endpoint}}}};
-
-    return flowJson.dump();
+    json msg = {{"id", 0},
+                {"kind", 2},
+                {"msg", Helpers::string_to_vec(flowJson.dump())}};
+    return msg.dump();
 }
 
 std::string Emailer::toJson(EmailInfo email) {
@@ -40,5 +43,8 @@ std::string Emailer::toJson(EmailInfo email) {
     flowJson["method"] = "sendMail";
     flowJson["param"] = emailJson;
 
-    return flowJson.dump();
+    json msg = {{"id", 0},
+                {"kind", 2},
+                {"msg", Helpers::string_to_vec(flowJson.dump())}};
+    return msg.dump();
 }

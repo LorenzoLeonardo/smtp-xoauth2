@@ -20,6 +20,7 @@ enum class JsonType {
     LogoutResponse,
     EmailResponse,
     DeviceCodeFlowResponse,
+    Event,
     Unknown
 };
 
@@ -70,7 +71,10 @@ struct EmailResponse {
     std::string response;
 };
 
-// Csmtpxoauth2Dlg dialog
+struct Event {
+
+ };
+    // Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx {
     // Construction
   public:

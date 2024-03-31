@@ -40,9 +40,8 @@ void CLoginDlg::SetUserCode(std::string usercode) {
 }
 void CLoginDlg::SetExpiryTime(int expires) {}
 
-void CLoginDlg::SetErrorNotice(std::string error) {
-    _ctrlStaticNote.SetWindowText(
-        static_cast<LPCTSTR>(Helpers::Utf8ToCString(error)));
+void CLoginDlg::SetErrorNotice(CString error) {
+    _ctrlStaticNote.SetWindowText(error);
 }
 BOOL CLoginDlg::OnInitDialog() {
     CDialogEx::OnInitDialog();

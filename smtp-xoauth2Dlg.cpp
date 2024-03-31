@@ -201,26 +201,18 @@ UINT MyThreadFunction(LPVOID pParam) {
 }
 
 JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
-    if (json_data.find("response") != json_data.end()) {
-        json response = json_data.at("response");
-        if (response.find("device_code") != response.end()) {
-            return JsonType::LoginReply;
-        } else if (response.find("access_token") != response.end()) {
-            return JsonType::TokenResponse;
-        } else if (response.find("sender_name") != response.end()) {
-            return JsonType::ProfileResponse;
-        } else if (json_data.at("response").is_boolean()) {
-            return JsonType::LogoutResponse;
-        } else if (json_data.at("response").is_string()) {
-            return JsonType::EmailResponse;
-        } else {
-            return JsonType::Unknown;
-        }
+
+    if (json_data.find("device_code") != json_data.end()) {
+        return JsonType::LoginReply;
+    } else if (json_data.find("access_token") != json_data.end()) {
+        return JsonType::TokenResponse;
+    } else if (json_data.find("sender_name") != json_data.end()) {
+        return JsonType::ProfileResponse;
     } else if (json_data.find("error") != json_data.end()) {
         return JsonType::Error;
     } else if (json_data.find("event") != json_data.end()) {
-        if (json_data.find("result") != json_data.end()) {
-            json response = json_data.at("result");
+        if (json_data.find("param") != json_data.end()) {
+            json response = json_data.at("param");
             if (response.find("error_code") != response.end()) {
                 return JsonType::TokenResponseError;
             } else if (response.find("access_token") != response.end()) {
@@ -233,14 +225,30 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
         } else {
             return JsonType::Unknown;
         }
+    } else if (json_data.find("error_code") != json_data.end()) {
+        return JsonType::TokenResponseError;
+    } else if (json_data.is_string()) {
+
+        if (json_data.get<std::string>() == "success") {
+            return JsonType::EmailResponse;
+        }
+    } else if (json_data.is_boolean()) {
+        if (json_data.get<bool>() == true) {
+            return JsonType::LogoutResponse;
+        }
     } else {
         return JsonType::Unknown;
     }
 }
 
 void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
-    json jsonLogin = nlohmann::json::parse(jsonStr);
+    json raw = nlohmann::json::parse(jsonStr);
 
+    std::vector<unsigned char> msg =
+        raw.at("msg").get<std::vector<unsigned char>>();
+    std::string str(msg.begin(), msg.end());
+
+    json jsonLogin = nlohmann::json::parse(str);
     JsonType jType = determineJsonType(jsonLogin);
 
     try {
@@ -248,16 +256,12 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         case JsonType::LoginReply: {
             LoginReply login;
 
-            login.interval = jsonLogin.at("response").at("interval").get<int>();
-            login.device_code =
-                jsonLogin.at("response").at("device_code").get<std::string>();
-            login.user_code =
-                jsonLogin.at("response").at("user_code").get<std::string>();
-            login.verification_uri = jsonLogin.at("response")
-                                         .at("verification_uri")
-                                         .get<std::string>();
-            login.expires_in =
-                jsonLogin.at("response").at("expires_in").get<int>();
+            login.interval = jsonLogin.at("interval").get<int>();
+            login.device_code = jsonLogin.at("device_code").get<std::string>();
+            login.user_code = jsonLogin.at("user_code").get<std::string>();
+            login.verification_uri =
+                jsonLogin.at("verification_uri").get<std::string>();
+            login.expires_in = jsonLogin.at("expires_in").get<int>();
             _pLoginDialog->SetUrl(login.verification_uri);
             _pLoginDialog->SetUserCode(login.user_code);
             break;
@@ -307,8 +311,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
 
             if (token.error_code == "no_token" ||
                 token.error_code == "expired_token" ||
-                token.error_code == "invalid_grant" ||
-                token.error_code == "authorization_declined") {
+                token.error_code == "invalid_grant") {
                 _pLoginDialog->ShowWindow(SW_HIDE);
                 _pLoginDialog->UpdateWindow();
 
@@ -318,8 +321,12 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 login();
             } else if (token.error_code == "authorization_pending" ||
                        token.error_code == "slow_down") {
-                _pLoginDialog->SetErrorNotice(Helpers::CStringToUtf8(error));
-            } else {
+                _pLoginDialog->SetErrorNotice(error);
+            } else if (token.error_code == "io_error") {
+                login();
+            }
+
+            else {
                 _pLoginDialog->ShowWindow(SW_HIDE);
                 _pLoginDialog->UpdateWindow();
 
@@ -346,15 +353,14 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         case JsonType::LogoutResponse: {
             bool response = false;
 
-            response = jsonLogin.at("response").get<bool>();
+            response = jsonLogin.get<bool>();
             if (response) {
                 login();
             }
             break;
         }
         case JsonType::EmailResponse: {
-            std::string response = jsonLogin.at("response").get<std::string>();
-            if (response == "success") {
+            if (jsonLogin.get<std::string>() == "success") {
                 AfxMessageBox(_T("The E-mail was successfully sent!"),
                               MB_ICONINFORMATION | MB_OK);
             }
@@ -375,60 +381,70 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
 }
 
 TokenResponse Csmtpxoauth2Dlg::handleTokenResponse(json jsonLogin) {
-    json response;
-
-    if (jsonLogin.find("response") != jsonLogin.end()) {
-        response = jsonLogin.at("response");
-    } else if (jsonLogin.find("event") != jsonLogin.end()) {
-        if (jsonLogin.find("result") != jsonLogin.end()) {
-            response = jsonLogin.at("result");
-        }
-    }
-
     TokenResponse token;
+    std::string dom = jsonLogin.dump();
 
-    token.access_token = response.at("access_token").get<std::string>();
-    token.refresh_token = response.at("refresh_token").get<std::string>();
-    token.scopes = response.at("scopes").get<std::vector<std::string>>();
-    token.expires_in.secs = response.at("expires_in").at("secs").get<int>();
-    token.expires_in.nanos = response.at("expires_in").at("nanos").get<int>();
-    token.token_receive_time.secs =
-        response.at("token_receive_time").at("secs").get<int>();
-    token.token_receive_time.nanos =
-        response.at("token_receive_time").at("nanos").get<int>();
-
+    if (jsonLogin.find("param") == jsonLogin.end()) {
+        token.access_token = jsonLogin.at("access_token").get<std::string>();
+        token.refresh_token = jsonLogin.at("refresh_token").get<std::string>();
+        token.scopes = jsonLogin.at("scopes").get<std::vector<std::string>>();
+        token.expires_in.secs =
+            jsonLogin.at("expires_in").at("secs").get<int>();
+        token.expires_in.nanos =
+            jsonLogin.at("expires_in").at("nanos").get<int>();
+        token.token_receive_time.secs =
+            jsonLogin.at("token_receive_time").at("secs").get<int>();
+        token.token_receive_time.nanos =
+            jsonLogin.at("token_receive_time").at("nanos").get<int>();
+    } else {
+        token.access_token =
+            jsonLogin.at("param").at("access_token").get<std::string>();
+        token.refresh_token =
+            jsonLogin.at("param").at("refresh_token").get<std::string>();
+        token.scopes =
+            jsonLogin.at("param").at("scopes").get<std::vector<std::string>>();
+        token.expires_in.secs =
+            jsonLogin.at("param").at("expires_in").at("secs").get<int>();
+        token.expires_in.nanos =
+            jsonLogin.at("param").at("expires_in").at("nanos").get<int>();
+        token.token_receive_time.secs = jsonLogin.at("param")
+                                            .at("token_receive_time")
+                                            .at("secs")
+                                            .get<int>();
+        token.token_receive_time.nanos = jsonLogin.at("param")
+                                             .at("token_receive_time")
+                                             .at("nanos")
+                                             .get<int>();
+    }
     return token;
 }
 
 TokenResponseError Csmtpxoauth2Dlg::handleTokenResponseError(json jsonLogin) {
-    json response;
 
-    if (jsonLogin.find("response") != jsonLogin.end()) {
-        response = jsonLogin.at("response");
-    } else if (jsonLogin.find("event") != jsonLogin.end()) {
-        if (jsonLogin.find("result") != jsonLogin.end()) {
-            response = jsonLogin.at("result");
-        }
+    TokenResponseError error = {};
+
+    std::string dom = jsonLogin.dump();
+
+    if (jsonLogin.find("param") == jsonLogin.end()) {
+        error.error_code = jsonLogin.at("error_code").get<std::string>();
+        error.error_code_desc =
+            jsonLogin.at("error_code_desc").get<std::string>();
+    } else {
+        error.error_code =
+            jsonLogin.at("param").at("error_code").get<std::string>();
+        error.error_code_desc =
+            jsonLogin.at("param").at("error_code_desc").get<std::string>();
     }
-
-    TokenResponseError error;
-
-    error.error_code = response.at("error_code").get<std::string>();
-    error.error_code_desc = response.at("error_code_desc").get<std::string>();
-
     return error;
 }
 
-ProfileResponse Csmtpxoauth2Dlg::handleProfileResponse(json jsonProfile) {
-    json response;
+ProfileResponse Csmtpxoauth2Dlg::handleProfileResponse(json jsonLogin) {
+    ProfileResponse profile = {};
 
-    if (jsonProfile.find("response") != jsonProfile.end()) {
-        response = jsonProfile.at("response");
-    }
+    std::string dom = jsonLogin.dump();
 
-    ProfileResponse profile;
-    profile.sender_name = response.at("sender_name").get<std::string>();
-    profile.sender_email = response.at("sender_email").get<std::string>();
+    profile.sender_name = jsonLogin.at("sender_name").get<std::string>();
+    profile.sender_email = jsonLogin.at("sender_email").get<std::string>();
     return profile;
 }
 void Csmtpxoauth2Dlg::OnStnClickedStaticFrom() {
@@ -437,7 +453,7 @@ void Csmtpxoauth2Dlg::OnStnClickedStaticFrom() {
 
 void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
 
-    EmailInfo info;
+    EmailInfo info = {};
 
     info.access_token = this->access_token;
     info.smtp_port = 587;

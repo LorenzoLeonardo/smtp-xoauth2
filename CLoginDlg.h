@@ -14,7 +14,7 @@ class CLoginDlg : public CDialogEx {
     void SetUrl(std::string url);
     void SetUserCode(std::string usercode);
     void SetExpiryTime(int expires);
-    void SetErrorNotice(std::string error);
+    void SetErrorNotice(CString error);
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

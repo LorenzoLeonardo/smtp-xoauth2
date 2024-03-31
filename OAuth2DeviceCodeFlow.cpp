@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Helpers.h"
 #include "OAuth2DeviceCodeFlow.h"
 
 DeviceCodeFlow
@@ -25,6 +26,7 @@ OAuth2DeviceCodeFlow::generateDeviceCodeFlow(std::string method) {
 }
 
 std::string OAuth2DeviceCodeFlow::toJson(DeviceCodeFlow login) {
+
     json flowJson = {
         {"object", login.object},
         {"method", login.method},
@@ -37,7 +39,10 @@ std::string OAuth2DeviceCodeFlow::toJson(DeviceCodeFlow login) {
           {"device_auth_endpoint", login.param.device_auth_endpoint},
           {"client_id", login.param.client_id}}}};
 
-    return flowJson.dump();
+    json msg = {{"id", 0},
+                {"kind", 2},
+                {"msg", Helpers::string_to_vec(flowJson.dump())}};
+    return msg.dump();
 }
 
 std::string OAuth2DeviceCodeFlow::login() {
@@ -50,8 +55,11 @@ std::string OAuth2DeviceCodeFlow::logout() {
     return toJson(generateDeviceCodeFlow("logout"));
 }
 std::string OAuth2DeviceCodeFlow::subscribeToEvent() {
-    json listen_event = {{"event_name", "oauth2"}};
-    return listen_event.dump();
+
+    json msg = {{"id", 0},
+                {"kind", 6},
+                {"msg", Helpers::string_to_vec(std::string("oauth2"))}};
+    return msg.dump();
 }
 std::string OAuth2DeviceCodeFlow::cancel() {
     return toJson(generateDeviceCodeFlow("cancel"));
