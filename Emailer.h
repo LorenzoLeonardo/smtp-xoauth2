@@ -33,3 +33,7 @@ std::string toJson(Profile request);
 namespace Emailer {
 std::string toJson(EmailInfo info);
 }
+
+namespace RequestContacts {
+std::string toJson(Profile request);
+}

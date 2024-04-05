@@ -6,8 +6,10 @@
 class TcpClient {
   public:
     TcpClient() {
-        _serverIp = NULL;
+        _serverIp = nullptr;
+        _serverPort = 0;
         _clientSocket = INVALID_SOCKET;
+        _wsaData = {};
     }
     TcpClient(const char *serverIp, int serverPort);
     ~TcpClient();
@@ -17,6 +19,8 @@ class TcpClient {
     int Send(const char *data, int length);
 
     int Receive(char *buffer, int length);
+
+    size_t ReceiveString(std::string &buffer);
 
     int Shutdown();
 

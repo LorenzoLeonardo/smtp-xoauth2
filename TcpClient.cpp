@@ -2,6 +2,8 @@
 
 #include "TcpClient.h"
 
+constexpr auto MAX_CHUNK = 4096;
+
 TcpClient::TcpClient(const char *serverIp, int serverPort)
     : _serverIp(serverIp), _serverPort(serverPort) {
 
@@ -72,6 +74,24 @@ int TcpClient::Receive(char *buffer, int length) {
         return SOCKET_ERROR;
     }
     return bytesRead;
+}
+
+size_t TcpClient::ReceiveString(std::string &buffer) {
+
+    char chunk[MAX_CHUNK] = {};
+    int bytesRead = 0;
+    do {
+
+        bytesRead = recv(_clientSocket, chunk, MAX_CHUNK, 0);
+        if (bytesRead == SOCKET_ERROR) {
+            std::cerr << "Error receiving data: " << WSAGetLastError()
+                      << std::endl;
+            return SOCKET_ERROR;
+        }
+        buffer.append(chunk, bytesRead);
+    } while (bytesRead != 0);
+
+    return buffer.length();
 }
 
 int TcpClient::Shutdown() { return closesocket(_clientSocket); }
