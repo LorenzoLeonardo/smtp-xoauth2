@@ -48,3 +48,15 @@ std::string Emailer::toJson(EmailInfo email) {
                 {"msg", Helpers::string_to_vec(flowJson.dump())}};
     return msg.dump();
 }
+
+std::string RequestContacts::toJson(Profile request) {
+    json flowJson = {{"object", "applications.email"},
+                     {"method", "getContacts"},
+                     {"param",
+                      {{"access_token", request.access_token},
+                       {"profile_endpoint", request.profile_endpoint}}}};
+    json msg = {{"id", 0},
+                {"kind", 2},
+                {"msg", Helpers::string_to_vec(flowJson.dump())}};
+    return msg.dump();
+}

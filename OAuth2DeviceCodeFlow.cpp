@@ -15,13 +15,14 @@ OAuth2DeviceCodeFlow::generateDeviceCodeFlow(std::string method) {
         "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode";
     flow.param.token_endpoint =
         "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+
     flow.param.client_id = "64c5d510-4b7e-4a18-8869-89778461c266";
     flow.param.process = "smtp-xoauth2";
     flow.param.provider = "Microsoft";
     flow.param.scopes.push_back("offline_access");
     flow.param.scopes.push_back("https://outlook.office.com/SMTP.Send");
     flow.param.scopes.push_back("https://outlook.office.com/User.Read");
-
+    flow.param.scopes.push_back("https://outlook.office.com/Contacts.Read");
     return flow;
 }
 

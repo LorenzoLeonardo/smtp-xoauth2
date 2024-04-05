@@ -231,10 +231,14 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
 
         if (json_data.get<std::string>() == "success") {
             return JsonType::EmailResponse;
+        } else {
+            return JsonType::Error;
         }
     } else if (json_data.is_boolean()) {
         if (json_data.get<bool>() == true) {
             return JsonType::LogoutResponse;
+        } else {
+            return JsonType::Error;
         }
     } else {
         return JsonType::Unknown;
@@ -296,6 +300,14 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             profile.profile_endpoint = "https://outlook.office.com/api/v2.0/me";
 
             std::string request = RequestProfile::toJson(profile);
+            this->access_token = profile.access_token;
+            this->_client.Send(request.c_str(), (int)request.length());
+
+            profile.access_token = token.access_token;
+            profile.profile_endpoint =
+                "https://outlook.office.com/api/v2.0/me/contacts";
+
+            request = RequestContacts::toJson(profile);
             this->access_token = profile.access_token;
             this->_client.Send(request.c_str(), (int)request.length());
             break;
