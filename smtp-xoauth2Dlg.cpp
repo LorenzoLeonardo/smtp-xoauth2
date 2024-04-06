@@ -194,7 +194,13 @@ UINT MyThreadFunction(LPVOID pParam) {
 
             size_t bytes_read = dlg->_client.Receive(jsonStr);
             if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
-                dlg->handleJsonMessages(jsonStr);
+                std::vector<std::string> sep = Helpers::separate(jsonStr);
+                sep = Helpers::removeDuplicates(sep);
+                for (const auto &elem : sep) {
+                    if (!dlg->_flagCancelled) {
+                        dlg->handleJsonMessages(elem);
+                    }
+                }
             } else {
                 break;
             }
@@ -294,6 +300,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
                 AfxMessageBox(
                     static_cast<LPCTSTR>(Helpers::Utf8ToCString(error.error)),
                     MB_ICONERROR | MB_OK);
+                this->_flagCancelled = true;
                 this->PostMessage(WM_CLOSE);
             }
             break;
