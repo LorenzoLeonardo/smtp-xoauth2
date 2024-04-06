@@ -80,3 +80,26 @@ std::vector<unsigned char> Helpers::string_to_vec(std::string str) {
     }
     return bytes;
 }
+
+std::vector<std::string> Helpers::separate(const std::string &data) {
+    std::string json_str = data;
+
+    if (json_str.find("}{") == std::string::npos) {
+        return {data};
+    }
+
+    std::vector<std::string> parts;
+    size_t pos = 0;
+    while ((pos = json_str.find("}{", pos)) != std::string::npos) {
+        parts.push_back(json_str.substr(0, pos + 1) + "}");
+        json_str.erase(0, pos + 2);
+    }
+    parts.push_back("{" + json_str);
+
+    for (size_t n = 0; n < parts.size(); ++n) {
+        if (n == parts.size() - 1) {
+            parts[n].pop_back();
+        }
+    }
+    return parts;
+}
