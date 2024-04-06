@@ -184,7 +184,7 @@ UINT MyThreadFunction(LPVOID pParam) {
         while (true) {
             std::string jsonStr;
 
-            size_t bytes_read = dlg->_client.ReceiveString(jsonStr);
+            size_t bytes_read = dlg->_client.Receive(jsonStr);
             if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
                 dlg->handleJsonMessages(jsonStr);
 

@@ -21,7 +21,7 @@ json RemoteCaller::remoteCall(std::string &object, std::string &method,
 
     std::string jsonStr;
 
-    size_t bytes_read = _client.ReceiveString(jsonStr);
+    size_t bytes_read = _client.Receive(jsonStr);
 
     json raw = nlohmann::json::parse(jsonStr);
 
@@ -51,7 +51,7 @@ json RemoteListener::remoteListen(std::string &object, std::string &method,
     std::string jsonStr;
 
     while (true) {
-        size_t bytes_read = _client.ReceiveString(jsonStr);
+        size_t bytes_read = _client.Receive(jsonStr);
 
         json raw = nlohmann::json::parse(jsonStr);
 
