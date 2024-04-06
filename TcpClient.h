@@ -18,9 +18,7 @@ class TcpClient {
 
     int Send(const char *data, int length);
 
-    int Receive(char *buffer, int length);
-
-    size_t ReceiveString(std::string &buffer);
+    size_t Receive(std::string &buffer);
 
     int Shutdown();
 

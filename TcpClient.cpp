@@ -74,23 +74,7 @@ int TcpClient::Send(const char *data, int length) {
     return bytesSent;
 }
 
-int TcpClient::Receive(char *buffer, int length) {
-
-    if (UINT16_MAX < length) {
-        std::cerr << "Error max data length overflow" << std::endl;
-        return SOCKET_ERROR;
-    }
-    int bytesRead = recv(_clientSocket, buffer, length, 0);
-    if (bytesRead == SOCKET_ERROR) {
-        std::string err =
-            std::format("Error receiving data: {}", WSAGetLastError());
-
-        throw SmtpError(err);
-    }
-    return bytesRead;
-}
-
-size_t TcpClient::ReceiveString(std::string &buffer) {
+size_t TcpClient::Receive(std::string &buffer) {
 
     char chunk[MAX_CHUNK] = {};
     int bytesRead = 0;
