@@ -178,12 +178,10 @@ UINT MyThreadFunction(LPVOID pParam) {
     // Your thread logic here
     Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
     while (true) {
-        char buffer[UINT16_MAX] = {};
+        std::string jsonStr;
 
-        int bytes_read = dlg->_client.Receive(buffer, UINT16_MAX);
+        int bytes_read = dlg->_client.ReceiveString(jsonStr);
         if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
-
-            std::string jsonStr(buffer, bytes_read);
             dlg->handleJsonMessages(jsonStr);
 
             dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
