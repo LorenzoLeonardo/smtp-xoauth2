@@ -23,9 +23,6 @@ class Csmtpxoauth2App : public CWinApp {
     virtual BOOL InitInstance();
     // Implementation
 
-  protected:
-    std::vector<PROCESS_INFORMATION> _processInfo;
-
     DECLARE_MESSAGE_MAP()
 };
 
