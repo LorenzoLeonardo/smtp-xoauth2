@@ -102,9 +102,14 @@ size_t TcpClient::ReceiveString(std::string &buffer) {
                 std::format("Error receiving data: {}", WSAGetLastError());
 
             throw SmtpError(err);
+        } else if (bytesRead == 0) {
+            std::string err = std::format("connection to server was closed: {}",
+                                          WSAGetLastError());
+
+            throw SmtpError(err);
         }
         buffer.append(chunk, bytesRead);
-    } while (bytesRead != 0);
+    } while (!(bytesRead < MAX_CHUNK));
 
     return buffer.length();
 }
