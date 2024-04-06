@@ -4,6 +4,7 @@
 #include "pch.h"
 
 #include "Emailer.h"
+#include "Error.h"
 #include "Helpers.h"
 #include "afxdialogex.h"
 #include "framework.h"
@@ -48,7 +49,9 @@ Csmtpxoauth2Dlg::Csmtpxoauth2Dlg(CWnd *pParent /*=nullptr*/)
     : CDialogEx(IDD_SMTPXOAUTH2_DIALOG, pParent) {
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     _pThread = NULL;
+    _flagCancelled = false;
 }
+Csmtpxoauth2Dlg::~Csmtpxoauth2Dlg() { _pLoginDialog->DestroyWindow(); }
 
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
     CDialogEx::DoDataExchange(pDX);
@@ -176,24 +179,28 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonLogout() {
 
 UINT MyThreadFunction(LPVOID pParam) {
     // Your thread logic here
-    Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
-    while (true) {
-        std::string jsonStr;
+    try {
+        Csmtpxoauth2Dlg *dlg = static_cast<Csmtpxoauth2Dlg *>(pParam);
+        while (true) {
+            std::string jsonStr;
 
-        int bytes_read = dlg->_client.ReceiveString(jsonStr);
-        if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
-            dlg->handleJsonMessages(jsonStr);
+            size_t bytes_read = dlg->_client.ReceiveString(jsonStr);
+            if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
+                dlg->handleJsonMessages(jsonStr);
 
-            dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
-            dlg->_editResponseArea.SendMessage(
-                EM_REPLACESEL, TRUE,
-                (LPARAM) static_cast<LPCTSTR>(Helpers::Utf8ToCString(jsonStr)));
-            dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
-            dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE,
-                                               (LPARAM)L"\r\n\r\n");
-        } else {
-            break;
+                dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
+                dlg->_editResponseArea.SendMessage(
+                    EM_REPLACESEL, TRUE,
+                    (LPARAM) static_cast<LPCTSTR>(
+                        Helpers::Utf8ToCString(jsonStr)));
+                dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
+                dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE,
+                                                   (LPARAM)L"\r\n\r\n");
+            } else {
+                break;
+            }
         }
+    } catch (const SmtpError e) {
     }
     return 0; // Return the thread exit code
 }
@@ -483,7 +490,6 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonSend() {
 
     std::string data = Emailer::toJson(info);
     _client.Send(data.c_str(), (int)data.length());
-    // TODO: Add your control notification handler code here
 }
 
 void Csmtpxoauth2Dlg::OnBnClickedCancel() {

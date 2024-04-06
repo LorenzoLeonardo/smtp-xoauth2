@@ -71,15 +71,13 @@ struct EmailResponse {
     std::string response;
 };
 
-struct Event {
-
- };
-    // Csmtpxoauth2Dlg dialog
+struct Event {};
+// Csmtpxoauth2Dlg dialog
 class Csmtpxoauth2Dlg : public CDialogEx {
     // Construction
   public:
     Csmtpxoauth2Dlg(CWnd *pParent = nullptr); // standard constructor
-    ~Csmtpxoauth2Dlg() { _client.Close(); }
+    ~Csmtpxoauth2Dlg();
     void SetTcpClient(TcpClient &client) { _client = client; }
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -125,10 +123,8 @@ class Csmtpxoauth2Dlg : public CDialogEx {
 
     afx_msg void OnStnClickedStaticFrom();
     afx_msg void OnBnClickedButtonSend();
-    afx_msg void OnBnClickedButtonProfile();
     afx_msg void OnBnClickedButtonLogout();
     afx_msg void OnBnClickedCancel();
-    //    afx_msg void OnClose();
 };
 
 UINT MyThreadFunction(LPVOID pParam);
