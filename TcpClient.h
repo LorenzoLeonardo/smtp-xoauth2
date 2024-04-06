@@ -15,13 +15,8 @@ class TcpClient {
     ~TcpClient();
 
     bool Connect();
-
     int Send(const char *data, int length);
-
     size_t Receive(std::string &buffer);
-
-    int Shutdown();
-
     void Close();
 
   private:
