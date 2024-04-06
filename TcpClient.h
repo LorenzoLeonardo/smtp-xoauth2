@@ -5,12 +5,7 @@
 
 class TcpClient {
   public:
-    TcpClient() {
-        _serverIp = nullptr;
-        _serverPort = 0;
-        _clientSocket = INVALID_SOCKET;
-        _wsaData = {};
-    }
+    TcpClient();
     TcpClient(const char *serverIp, int serverPort);
     ~TcpClient();
 
