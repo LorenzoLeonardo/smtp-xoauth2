@@ -1,6 +1,8 @@
 #include "pch.h"
 
+#include "Error.h"
 #include "TcpClient.h"
+#include <format>
 
 constexpr auto MAX_CHUNK = 4096;
 
@@ -14,16 +16,24 @@ TcpClient::TcpClient(const char *serverIp, int serverPort)
     }
 }
 
-TcpClient::~TcpClient() { WSACleanup(); }
+TcpClient::~TcpClient() {
+    this->Close();
+    WSACleanup();
+}
 
-void TcpClient::Close() { closesocket(_clientSocket); }
+void TcpClient::Close() {
+    if (_clientSocket != INVALID_SOCKET) {
+        closesocket(_clientSocket);
+        _clientSocket = INVALID_SOCKET;
+    }
+}
 
 bool TcpClient::Connect() {
     _clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (_clientSocket == INVALID_SOCKET) {
-        std::cerr << "Error creating socket: " << WSAGetLastError()
-                  << std::endl;
-        return false;
+        std::string err =
+            std::format("Error creating socket: {}", WSAGetLastError());
+        throw SmtpError(err);
     }
 
     sockaddr_in serverAddress;
@@ -33,31 +43,33 @@ bool TcpClient::Connect() {
     serverAddress.sin_port = htons(_serverPort);
 
     if (inet_pton(AF_INET, _serverIp, &(serverAddress.sin_addr)) != 1) {
-        std::cerr << "Invalid IP address: " << _serverIp << std::endl;
-        closesocket(_clientSocket);
-        return false;
+        std::string err = std::format("Invalid IP address: {}", _serverIp);
+
+        throw SmtpError(err);
     }
 
     if (connect(_clientSocket, reinterpret_cast<SOCKADDR *>(&serverAddress),
                 sizeof(serverAddress)) == SOCKET_ERROR) {
-        std::cerr << "Error connecting to the server: " << WSAGetLastError()
-                  << std::endl;
-        closesocket(_clientSocket);
-        return false;
-    }
+        std::string err = std::format("Error connecting to the server: {}",
+                                      WSAGetLastError());
 
+        throw SmtpError(err);
+    }
     return true;
 }
 
 int TcpClient::Send(const char *data, int length) {
     if (UINT16_MAX < length) {
-        std::cerr << "Error max data length overflow" << std::endl;
-        return SOCKET_ERROR;
+        std::string err = std::format("Error max data length overflow");
+
+        throw SmtpError(err);
     }
     int bytesSent = send(_clientSocket, data, length, 0);
     if (bytesSent == SOCKET_ERROR) {
-        std::cerr << "Error sending data: " << WSAGetLastError() << std::endl;
-        return SOCKET_ERROR;
+        std::string err =
+            std::format("Error sending data: {}", WSAGetLastError());
+
+        throw SmtpError(err);
     }
     return bytesSent;
 }
@@ -70,8 +82,10 @@ int TcpClient::Receive(char *buffer, int length) {
     }
     int bytesRead = recv(_clientSocket, buffer, length, 0);
     if (bytesRead == SOCKET_ERROR) {
-        std::cerr << "Error receiving data: " << WSAGetLastError() << std::endl;
-        return SOCKET_ERROR;
+        std::string err =
+            std::format("Error receiving data: {}", WSAGetLastError());
+
+        throw SmtpError(err);
     }
     return bytesRead;
 }
@@ -84,9 +98,10 @@ size_t TcpClient::ReceiveString(std::string &buffer) {
 
         bytesRead = recv(_clientSocket, chunk, MAX_CHUNK, 0);
         if (bytesRead == SOCKET_ERROR) {
-            std::cerr << "Error receiving data: " << WSAGetLastError()
-                      << std::endl;
-            return SOCKET_ERROR;
+            std::string err =
+                std::format("Error receiving data: {}", WSAGetLastError());
+
+            throw SmtpError(err);
         }
         buffer.append(chunk, bytesRead);
     } while (bytesRead != 0);

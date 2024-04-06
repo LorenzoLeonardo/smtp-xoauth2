@@ -187,8 +187,10 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Channel.h" />
     <ClInclude Include="CLoginDlg.h" />
     <ClInclude Include="Emailer.h" />
+    <ClInclude Include="Error.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="OAuth2DeviceCodeFlow.h" />
@@ -201,8 +203,10 @@
     <ClInclude Include="TcpClient.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Channel.cpp" />
     <ClCompile Include="CLoginDlg.cpp" />
     <ClCompile Include="Emailer.cpp" />
+    <ClCompile Include="Error.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="OAuth2DeviceCodeFlow.cpp" />
     <ClCompile Include="pch.cpp">

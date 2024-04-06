@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Error.h"
 #include "Helpers.h"
 #include "Remote.h"
 
@@ -21,19 +22,15 @@ json RemoteCaller::remoteCall(std::string &object, std::string &method,
     std::string jsonStr;
 
     size_t bytes_read = _client.ReceiveString(jsonStr);
-    if (bytes_read != SOCKET_ERROR) {
-        json raw = nlohmann::json::parse(jsonStr);
 
-        std::vector<unsigned char> msg =
-            raw.at("msg").get<std::vector<unsigned char>>();
-        std::string str(msg.begin(), msg.end());
+    json raw = nlohmann::json::parse(jsonStr);
 
-        json result = nlohmann::json::parse(str);
-        return result;
-    } else {
-        json empty;
-        return empty;
-    }
+    std::vector<unsigned char> response =
+        raw.at("msg").get<std::vector<unsigned char>>();
+    std::string str(response.begin(), response.end());
+
+    json result = nlohmann::json::parse(str);
+    return result;
 }
 
 RemoteListener::RemoteListener() { _client = TcpClient("127.0.0.1", 1986); }
@@ -42,6 +39,7 @@ RemoteListener::~RemoteListener() { _client.Close(); }
 bool RemoteListener::connect() { return _client.Connect(); }
 json RemoteListener::remoteListen(std::string &object, std::string &method,
                                   EventCallback callback) {
+
     json result;
     json stream = {{"id", 0},
                    {"kind", 6},
@@ -54,18 +52,15 @@ json RemoteListener::remoteListen(std::string &object, std::string &method,
 
     while (true) {
         size_t bytes_read = _client.ReceiveString(jsonStr);
-        if (bytes_read != SOCKET_ERROR) {
-            json raw = nlohmann::json::parse(jsonStr);
 
-            std::vector<unsigned char> msg =
-                raw.at("msg").get<std::vector<unsigned char>>();
-            std::string str(msg.begin(), msg.end());
+        json raw = nlohmann::json::parse(jsonStr);
 
-            json result = nlohmann::json::parse(str);
-            callback(result);
-        } else {
-            break;
-        }
+        std::vector<unsigned char> msg =
+            raw.at("msg").get<std::vector<unsigned char>>();
+        std::string str(msg.begin(), msg.end());
+
+        json result = nlohmann::json::parse(str);
+        callback(result);
     }
     return result;
 }
