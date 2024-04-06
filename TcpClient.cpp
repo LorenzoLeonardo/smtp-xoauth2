@@ -7,9 +7,9 @@
 constexpr auto MAX_CHUNK = 4096;
 
 TcpClient::TcpClient(const char *serverIp, int serverPort)
-    : _serverIp(serverIp), _serverPort(serverPort) {
+    : _serverIp(serverIp), _serverPort(serverPort),
+      _clientSocket(INVALID_SOCKET) {
 
-    _clientSocket = INVALID_SOCKET;
     if (WSAStartup(MAKEWORD(2, 2), &_wsaData) != 0) {
         std::cerr << "WSAStartup failed" << std::endl;
         return;
