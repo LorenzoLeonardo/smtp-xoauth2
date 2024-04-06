@@ -91,15 +91,28 @@ std::vector<std::string> Helpers::separate(const std::string &data) {
     std::vector<std::string> parts;
     size_t pos = 0;
     while ((pos = json_str.find("}{", pos)) != std::string::npos) {
-        parts.push_back(json_str.substr(0, pos + 1) + "}");
+        parts.push_back(json_str.substr(0, pos + 1));
         json_str.erase(0, pos + 2);
     }
     parts.push_back("{" + json_str);
 
-    for (size_t n = 0; n < parts.size(); ++n) {
-        if (n == parts.size() - 1) {
-            parts[n].pop_back();
-        }
-    }
+
     return parts;
+}
+
+std::vector<std::string>
+Helpers::removeDuplicates(const std::vector<std::string> &vec) {
+    std::vector<std::string> result;
+
+    // Sort the vector to bring identical items together
+    std::vector<std::string> sortedVec = vec;
+    std::sort(sortedVec.begin(), sortedVec.end());
+
+    // Unique algorithm removes consecutive duplicates
+    auto it = std::unique(sortedVec.begin(), sortedVec.end());
+
+    // Copy the unique elements to the result vector
+    result.assign(sortedVec.begin(), it);
+
+    return result;
 }
