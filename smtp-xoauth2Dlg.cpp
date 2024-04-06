@@ -244,6 +244,12 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
         } else {
             return JsonType::Error;
         }
+    } else if (json_data.find("MailSend") != json_data.end() ||
+               json_data.find("Curl") != json_data.end() ||
+               json_data.find("Http") != json_data.end() ||
+               json_data.find("Serde") != json_data.end() ||
+               json_data.find("RemoteCall") != json_data.end()) {
+        return JsonType::EmailResponseError;
     } else {
         return JsonType::Unknown;
     }
@@ -382,6 +388,38 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             }
             break;
         }
+
+        case JsonType::EmailResponseError: {
+
+            if (jsonLogin.find("MailSend") != jsonLogin.end() ||
+                jsonLogin.find("Curl") != jsonLogin.end() ||
+                jsonLogin.find("Http") != jsonLogin.end() ||
+                jsonLogin.find("Serde") != jsonLogin.end() ||
+                jsonLogin.find("RemoteCall") != jsonLogin.end()) {
+                std::string err;
+
+                if (!jsonLogin.at("MailSend").empty()) {
+                    err = jsonLogin.at("MailSend").get<std::string>();
+                } else if (!jsonLogin.at("Curl").empty()) {
+                    err = jsonLogin.at("Curl").get<std::string>();
+                } else if (!jsonLogin.at("Http").empty()) {
+                    err = jsonLogin.at("Http").get<std::string>();
+                } else if (!jsonLogin.at("Serde").empty()) {
+                    err = jsonLogin.at("Serde").get<std::string>();
+                } else if (!jsonLogin.at("RemoteCall").empty()) {
+                    err = jsonLogin.at("RemoteCall").get<std::string>();
+                }
+
+                CString error =
+                    static_cast<LPCTSTR>(Helpers::Utf8ToCString(err));
+
+                AfxMessageBox(error, MB_ICONERROR | MB_OK);
+            } else {
+                AfxMessageBox(_T("Undefined error for Emailer."),
+                              MB_ICONERROR | MB_OK);
+            }
+            break;
+        }
         case JsonType::DeviceCodeFlowResponse: {
             DeviceCodeFlowResponse response =
                 OAuth2DeviceCodeFlow::toDeviceCodeFlowResponse(jsonLogin);
@@ -392,7 +430,9 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         }
         }
     } catch (const nlohmann::json::exception &e) {
-        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+        std::string err = std::format("Error parsing JSON: {}", e.what());
+        CString error = static_cast<LPCTSTR>(Helpers::Utf8ToCString(err));
+        AfxMessageBox(error, MB_ICONERROR | MB_OK);
     }
 }
 

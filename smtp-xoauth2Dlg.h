@@ -21,6 +21,7 @@ enum class JsonType {
     EmailResponse,
     DeviceCodeFlowResponse,
     Event,
+    EmailResponseError,
     Unknown
 };
 

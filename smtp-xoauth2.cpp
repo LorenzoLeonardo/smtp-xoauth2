@@ -79,7 +79,9 @@ BOOL Csmtpxoauth2App::InitInstance() {
         client.Send(stream.c_str(), (int)stream.length());
 
         Csmtpxoauth2Dlg dlg;
+
         dlg.SetTcpClient(client);
+        m_pMainWnd = &dlg;
 
         INT_PTR nResponse = dlg.DoModal();
 
