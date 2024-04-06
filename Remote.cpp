@@ -4,7 +4,7 @@
 #include "Helpers.h"
 #include "Remote.h"
 
-RemoteCaller::RemoteCaller() { _client = TcpClient("127.0.0.1", 1986); }
+RemoteCaller::RemoteCaller() : _client(TcpClient("127.0.0.1", 1986)) {}
 RemoteCaller::~RemoteCaller() { _client.Close(); }
 
 bool RemoteCaller::connect() { return _client.Connect(); }
@@ -33,7 +33,7 @@ json RemoteCaller::remoteCall(std::string &object, std::string &method,
     return result;
 }
 
-RemoteListener::RemoteListener() { _client = TcpClient("127.0.0.1", 1986); }
+RemoteListener::RemoteListener() : _client(TcpClient("127.0.0.1", 1986)) {}
 RemoteListener::~RemoteListener() { _client.Close(); }
 
 bool RemoteListener::connect() { return _client.Connect(); }

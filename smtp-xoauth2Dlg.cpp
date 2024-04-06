@@ -46,11 +46,10 @@ END_MESSAGE_MAP()
 // Csmtpxoauth2Dlg dialog
 
 Csmtpxoauth2Dlg::Csmtpxoauth2Dlg(CWnd *pParent /*=nullptr*/)
-    : CDialogEx(IDD_SMTPXOAUTH2_DIALOG, pParent) {
-    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-    _pThread = NULL;
-    _flagCancelled = false;
-}
+    : CDialogEx(IDD_SMTPXOAUTH2_DIALOG, pParent),
+      m_hIcon(AfxGetApp()->LoadIcon(IDR_MAINFRAME)), _pThread(nullptr),
+      _flagCancelled(false) {}
+
 Csmtpxoauth2Dlg::~Csmtpxoauth2Dlg() { _pLoginDialog->DestroyWindow(); }
 
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
