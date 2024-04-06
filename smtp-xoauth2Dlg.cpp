@@ -54,7 +54,6 @@ Csmtpxoauth2Dlg::~Csmtpxoauth2Dlg() { _pLoginDialog->DestroyWindow(); }
 
 void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_EDIT_OUTPUT, _editResponseArea);
     DDX_Control(pDX, IDC_EDIT_SENDER_NAME, _ctrlEditSenderName);
     DDX_Control(pDX, IDC_EDIT_SENDER_EMAIL, _ctrlEditSenderEmail);
     DDX_Control(pDX, IDC_EDIT_RECIPIENTS, _ctrlEditRecipients);
@@ -186,15 +185,6 @@ UINT MyThreadFunction(LPVOID pParam) {
             size_t bytes_read = dlg->_client.Receive(jsonStr);
             if (bytes_read != SOCKET_ERROR && !dlg->_flagCancelled) {
                 dlg->handleJsonMessages(jsonStr);
-
-                dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
-                dlg->_editResponseArea.SendMessage(
-                    EM_REPLACESEL, TRUE,
-                    (LPARAM) static_cast<LPCTSTR>(
-                        Helpers::Utf8ToCString(jsonStr)));
-                dlg->_editResponseArea.SendMessage(EM_SETSEL, -1, -1);
-                dlg->_editResponseArea.SendMessage(EM_REPLACESEL, TRUE,
-                                                   (LPARAM)L"\r\n\r\n");
             } else {
                 break;
             }
