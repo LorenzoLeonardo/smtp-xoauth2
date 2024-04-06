@@ -97,5 +97,3 @@ size_t TcpClient::Receive(std::string &buffer) {
 
     return buffer.length();
 }
-
-int TcpClient::Shutdown() { return closesocket(_clientSocket); }
