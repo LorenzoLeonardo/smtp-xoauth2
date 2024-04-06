@@ -151,12 +151,14 @@ HCURSOR Csmtpxoauth2Dlg::OnQueryDragIcon() {
 
 void Csmtpxoauth2Dlg::login() {
     this->EnableWindow(FALSE);
+    this->clearFields();
 
     std::string jsonString = OAuth2DeviceCodeFlow::login();
 
     size_t byte_sent =
         _client.Send(jsonString.c_str(), (int)jsonString.length());
 
+    _pLoginDialog->clearFields();
     _pLoginDialog->ShowWindow(SW_SHOW);
     _pLoginDialog->UpdateWindow();
 }
@@ -173,6 +175,14 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonLogout() {
 
     size_t byte_sent =
         _client.Send(jsonString.c_str(), (int)jsonString.length());
+}
+
+void Csmtpxoauth2Dlg::clearFields() {
+    this->_ctrlEditBody.SetWindowText(_T(""));
+    this->_ctrlEditRecipients.SetWindowText(_T(""));
+    this->_ctrlEditSenderEmail.SetWindowText(_T(""));
+    this->_ctrlEditSenderName.SetWindowText(_T(""));
+    this->_ctrlEditSubject.SetWindowText(_T(""));
 }
 
 UINT MyThreadFunction(LPVOID pParam) {

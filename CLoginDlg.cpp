@@ -53,6 +53,12 @@ BOOL CLoginDlg::OnInitDialog() {
     return TRUE;
 }
 
+void CLoginDlg::clearFields() {
+    _ctrlStaticLink.SetWindowText(_T(""));
+    _ctrlEditUserCode.SetWindowText(_T(""));
+    _ctrlStaticNote.SetWindowText(_T(""));
+}
+
 void CLoginDlg::OnCancel() {
     // TODO: Add your specialized code here and/or call the base class
     if (GetParent() != NULL) {

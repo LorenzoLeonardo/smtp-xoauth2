@@ -113,6 +113,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     void login();
     void requestToken();
     void handleJsonMessages(std::string jsonStr);
+    void clearFields();
 
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
