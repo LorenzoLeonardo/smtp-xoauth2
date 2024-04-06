@@ -85,8 +85,6 @@ BOOL Csmtpxoauth2App::InitInstance() {
         INT_PTR nResponse = dlg.DoModal();
 
         dlg._pThread->ResumeThread();
-        dlg._pThread->ExitInstance();
-        dlg._pThread->Delete();
         if (nResponse == IDOK) {
             // TODO: Place code here to handle when the dialog is
             //  dismissed with OK

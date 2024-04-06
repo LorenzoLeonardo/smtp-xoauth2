@@ -101,8 +101,6 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     afx_msg HCURSOR OnQueryDragIcon();
     DECLARE_MESSAGE_MAP()
   public:
-    CEdit _editInputArea;
-    CEdit _editResponseArea;
     CEdit _ctrlEditSenderName;
     CEdit _ctrlEditSenderEmail;
     CEdit _ctrlEditRecipients;
