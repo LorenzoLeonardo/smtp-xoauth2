@@ -6,13 +6,23 @@
 
 constexpr auto MAX_CHUNK = 4096;
 
+TcpClient::TcpClient()
+    : _serverIp(nullptr), _serverPort(0), _clientSocket(INVALID_SOCKET) {
+
+    if (WSAStartup(MAKEWORD(2, 2), &_wsaData) != 0) {
+        std::cerr << "WSAStartup failed" << std::endl;
+        return;
+    }
+}
+
 TcpClient::TcpClient(const char *serverIp, int serverPort)
     : _serverIp(serverIp), _serverPort(serverPort),
       _clientSocket(INVALID_SOCKET) {
 
     if (WSAStartup(MAKEWORD(2, 2), &_wsaData) != 0) {
-        std::cerr << "WSAStartup failed" << std::endl;
-        return;
+        std::string err =
+            std::format("WSAStartup failed: {}", WSAGetLastError());
+        throw SmtpError(err);
     }
 }
 
@@ -77,6 +87,8 @@ int TcpClient::Send(const char *data, int length) {
 size_t TcpClient::Receive(std::string &buffer) {
 
     char chunk[MAX_CHUNK] = {};
+    buffer.clear();
+
     int bytesRead = 0;
     do {
 
