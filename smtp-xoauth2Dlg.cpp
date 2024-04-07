@@ -554,6 +554,7 @@ void Csmtpxoauth2Dlg::OnBnClickedCancel() {
 
 void Csmtpxoauth2Dlg::OnBnClickedButtonContacts() {
     CAddressBookDlg dlg;
+    dlg.setToken(access_token);
 
     dlg.DoModal();
 }
