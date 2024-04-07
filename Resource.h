@@ -33,8 +33,9 @@
 #define IDC_BUTTON_SEND                 1023
 #define IDC_BUTTON1                     1024
 #define IDC_BUTTON_PROFILE              1024
+#define IDC_BUTTON_PREV                 1024
 #define IDC_LIST_CONTACTS               1025
-#define IDC_SPIN_PAGE                   1026
+#define IDC_BUTTON_NEXT                 1026
 #define IDC_BUTTON_CONTACTS             1027
 
 // Next default values for new objects
