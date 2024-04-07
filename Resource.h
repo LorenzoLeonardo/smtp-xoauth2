@@ -10,6 +10,7 @@
 #define IDP_SOCKETS_INIT_FAILED         103
 #define IDR_MAINFRAME                   128
 #define IDD_DIALOG_LOGIN                130
+#define IDD_DIALOG_ADDRESS_BOOK         133
 #define IDC_EDIT_OUTPUT                 1001
 #define IDC_BUTTON_REQUEST_TOKEN        1002
 #define IDC_BUTTON_LOGOUT               1003
@@ -32,14 +33,17 @@
 #define IDC_BUTTON_SEND                 1023
 #define IDC_BUTTON1                     1024
 #define IDC_BUTTON_PROFILE              1024
+#define IDC_LIST_CONTACTS               1025
+#define IDC_SPIN_PAGE                   1026
+#define IDC_BUTTON_CONTACTS             1027
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
+#define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1025
+#define _APS_NEXT_CONTROL_VALUE         1028
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

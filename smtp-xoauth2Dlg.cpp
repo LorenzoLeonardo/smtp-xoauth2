@@ -3,6 +3,7 @@
 //
 #include "pch.h"
 
+#include "CAddressBookDlg.h"
 #include "Emailer.h"
 #include "Error.h"
 #include "Helpers.h"
@@ -69,6 +70,7 @@ ON_BN_CLICKED(IDCANCEL, &Csmtpxoauth2Dlg::OnBnClickedCancel)
 ON_BN_CLICKED(IDC_BUTTON_LOGOUT, &Csmtpxoauth2Dlg::OnBnClickedButtonLogout)
 ON_STN_CLICKED(IDC_STATIC_FROM, &Csmtpxoauth2Dlg::OnStnClickedStaticFrom)
 ON_BN_CLICKED(IDC_BUTTON_SEND, &Csmtpxoauth2Dlg::OnBnClickedButtonSend)
+ON_BN_CLICKED(IDC_BUTTON_CONTACTS, &Csmtpxoauth2Dlg::OnBnClickedButtonContacts)
 END_MESSAGE_MAP()
 
 // Csmtpxoauth2Dlg message handlers
@@ -548,4 +550,10 @@ void Csmtpxoauth2Dlg::OnBnClickedCancel() {
     _flagCancelled = true;
 
     CDialogEx::OnCancel();
+}
+
+void Csmtpxoauth2Dlg::OnBnClickedButtonContacts() {
+    CAddressBookDlg dlg;
+
+    dlg.DoModal();
 }

@@ -125,6 +125,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     afx_msg void OnBnClickedButtonSend();
     afx_msg void OnBnClickedButtonLogout();
     afx_msg void OnBnClickedCancel();
+    afx_msg void OnBnClickedButtonContacts();
 };
 
 UINT MyThreadFunction(LPVOID pParam);
