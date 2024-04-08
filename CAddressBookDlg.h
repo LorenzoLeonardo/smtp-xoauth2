@@ -19,18 +19,23 @@ class CAddressBookDlg : public CDialogEx {
   protected:
     virtual BOOL OnInitDialog();
     virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
-    void PopulateList();
 
     DECLARE_MESSAGE_MAP()
     CListCtrl _ctrlListContacts;
     RemoteCaller _remote;
     std::string _access_token;
-    CButton _ctrlBtnPrev;
-    CButton _ctrlBtnNext;
     std::string _nextLink;
     std::vector<std::string> _pageStack;
+
+    CWinThread *_pThread;
 
   public:
     afx_msg void OnBnClickedButtonPrev();
     afx_msg void OnBnClickedButtonNext();
+    void PopulateList();
+
+    CButton _ctrlBtnPrev;
+    CButton _ctrlBtnNext;
 };
+
+UINT RetrieveContactThread(LPVOID pParam);
