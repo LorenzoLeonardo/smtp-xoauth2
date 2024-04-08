@@ -28,5 +28,5 @@ enum Error {
     Unknown,
 };
 
-Error From(json &input);
+Error From(const json &input);
 } // namespace EmailerError
