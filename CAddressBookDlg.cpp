@@ -29,6 +29,9 @@ ON_BN_CLICKED(IDC_BUTTON_PREV, &CAddressBookDlg::OnBnClickedButtonPrev)
 ON_BN_CLICKED(IDC_BUTTON_NEXT, &CAddressBookDlg::OnBnClickedButtonNext)
 ON_NOTIFY(NM_DBLCLK, IDC_LIST_CONTACTS,
           &CAddressBookDlg::OnNMDblclkListContacts)
+ON_WM_SYSCOMMAND()
+ON_BN_CLICKED(IDOK, &CAddressBookDlg::OnBnClickedOk)
+ON_BN_CLICKED(IDCANCEL, &CAddressBookDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 BOOL CAddressBookDlg::OnInitDialog() {
@@ -42,6 +45,7 @@ BOOL CAddressBookDlg::OnInitDialog() {
     _ctrlListContacts.InsertColumn(1, _T("Contact Numer"), LVCFMT_LEFT, 100);
     _ctrlListContacts.InsertColumn(2, _T("Email Address"), LVCFMT_LEFT, 200);
 
+    _isBusy.store(false);
     try {
         _remote.connect();
         _pThread = AfxBeginThread(RetrieveContactThread, this,
@@ -57,8 +61,9 @@ BOOL CAddressBookDlg::OnInitDialog() {
 
 UINT RetrieveContactThread(LPVOID pParam) {
     CAddressBookDlg *dlg = static_cast<CAddressBookDlg *>(pParam);
-
+    dlg->_isBusy.store(true);
     dlg->PopulateList();
+    dlg->_isBusy.store(false);
     return 0;
 }
 
@@ -153,7 +158,51 @@ void CAddressBookDlg::OnNMDblclkListContacts(NMHDR *pNMHDR, LRESULT *pResult) {
         _ctrlListContacts.GetItem(&lvItem);
         _chosenEmail = lvItem.pszText;
         delete[] lvItem.pszText;
-        OnOK();
+        CAddressBookDlg::OnOK();
     }
     // pNMItemActivate->iItem
+}
+
+void CAddressBookDlg::OnSysCommand(UINT nID, LPARAM lParam) {
+
+    if ((nID & 0xFFF0) == SC_CLOSE) {
+        // Optionally, display a message to inform the user
+        if (_isBusy.load()) {
+
+            AfxMessageBox(_T("Address book is still busy."),
+                          MB_OK | MB_ICONINFORMATION);
+            // Return without calling the base class implementation,
+            // effectively preventing the dialog from closing.
+            return;
+        }
+    }
+    CDialogEx::OnSysCommand(nID, lParam);
+}
+
+void CAddressBookDlg::OnBnClickedOk() {
+    // TODO: Add your control notification handler code here
+    // Optionally, display a message to inform the user
+    if (_isBusy.load()) {
+
+        AfxMessageBox(_T("Address book is still busy."),
+                      MB_OK | MB_ICONINFORMATION);
+        // Return without calling the base class implementation,
+        // effectively preventing the dialog from closing.
+        return;
+    }
+    CDialogEx::OnOK();
+}
+
+void CAddressBookDlg::OnBnClickedCancel() {
+    // TODO: Add your control notification handler code here
+    // Optionally, display a message to inform the user
+    if (_isBusy.load()) {
+
+        AfxMessageBox(_T("Address book is still busy, please close later"),
+                      MB_OK | MB_ICONINFORMATION);
+        // Return without calling the base class implementation,
+        // effectively preventing the dialog from closing.
+        return;
+    }
+    CDialogEx::OnCancel();
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Remote.h"
 #include "afxdialogex.h"
+#include <atomic>
 #include <string>
 #include <vector>
 // CAddressBookDlg dialog
@@ -37,8 +38,12 @@ class CAddressBookDlg : public CDialogEx {
 
     CButton _ctrlBtnPrev;
     CButton _ctrlBtnNext;
+    std::atomic<bool> _isBusy;
     afx_msg void OnNMDblclkListContacts(NMHDR *pNMHDR, LRESULT *pResult);
     CString chosenEmail() { return _chosenEmail; }
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnBnClickedOk();
+    afx_msg void OnBnClickedCancel();
 };
 
 UINT RetrieveContactThread(LPVOID pParam);
