@@ -2,7 +2,7 @@
 
 #include "Error.h"
 
-EmailerError::Error EmailerError::From(json &input) {
+EmailerError::Error EmailerError::From(const json &input) {
     if (input.find("MailSend") != input.end()) {
         return EmailerError::MailSend;
     } else if (input.find("Curl") != input.end()) {

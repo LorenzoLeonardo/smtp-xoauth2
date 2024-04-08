@@ -252,11 +252,7 @@ JsonType Csmtpxoauth2Dlg::determineJsonType(const nlohmann::json &json_data) {
         } else {
             return JsonType::Error;
         }
-    } else if (json_data.find("MailSend") != json_data.end() ||
-               json_data.find("Curl") != json_data.end() ||
-               json_data.find("Http") != json_data.end() ||
-               json_data.find("Serde") != json_data.end() ||
-               json_data.find("RemoteCall") != json_data.end()) {
+    } else if (EmailerError::From(json_data) != EmailerError::Unknown) {
         return JsonType::EmailResponseError;
     } else {
         return JsonType::Unknown;
