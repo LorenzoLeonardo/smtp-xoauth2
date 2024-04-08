@@ -116,7 +116,6 @@ void CAddressBookDlg::PopulateList() {
     }
 }
 void CAddressBookDlg::OnBnClickedButtonPrev() {
-    // TODO: Add your control notification handler code here
 
     if (!_pageStack.empty()) {
         _pageStack.pop_back();
@@ -133,7 +132,6 @@ void CAddressBookDlg::OnBnClickedButtonPrev() {
 }
 
 void CAddressBookDlg::OnBnClickedButtonNext() {
-    // TODO: Add your control notification handler code here
     _ctrlBtnPrev.EnableWindow(TRUE);
     _pThread = AfxBeginThread(RetrieveContactThread, this,
                               THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
@@ -142,37 +140,31 @@ void CAddressBookDlg::OnBnClickedButtonNext() {
 void CAddressBookDlg::OnNMDblclkListContacts(NMHDR *pNMHDR, LRESULT *pResult) {
     LPNMITEMACTIVATE pNMItemActivate =
         reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-    // TODO: Add your control notification handler code here
+
     *pResult = 0;
     LVITEM lvItem = {};
     if (pNMItemActivate->iItem >= 0) {
-        lvItem.pszText = new TCHAR[MAX_PATH]; // Buffer to receive the item text
+        lvItem.pszText = new TCHAR[MAX_PATH];
         lvItem.cchTextMax = MAX_PATH;
 
-        lvItem.mask = LVIF_TEXT |
-                      LVIF_PARAM; // Specify the mask to retrieve text and data
-        lvItem.iItem = pNMItemActivate->iItem; // Index of the item
-        lvItem.iSubItem =
-            2; // Subitem index (if your list control has subitems)
+        lvItem.mask = LVIF_TEXT | LVIF_PARAM;
+        lvItem.iItem = pNMItemActivate->iItem;
+        lvItem.iSubItem = 2;
 
         _ctrlListContacts.GetItem(&lvItem);
         _chosenEmail = lvItem.pszText;
         delete[] lvItem.pszText;
         CAddressBookDlg::OnOK();
     }
-    // pNMItemActivate->iItem
 }
 
 void CAddressBookDlg::OnSysCommand(UINT nID, LPARAM lParam) {
 
     if ((nID & 0xFFF0) == SC_CLOSE) {
-        // Optionally, display a message to inform the user
         if (_isBusy.load()) {
 
             AfxMessageBox(_T("Address book is still busy."),
                           MB_OK | MB_ICONINFORMATION);
-            // Return without calling the base class implementation,
-            // effectively preventing the dialog from closing.
             return;
         }
     }
@@ -180,28 +172,20 @@ void CAddressBookDlg::OnSysCommand(UINT nID, LPARAM lParam) {
 }
 
 void CAddressBookDlg::OnBnClickedOk() {
-    // TODO: Add your control notification handler code here
-    // Optionally, display a message to inform the user
     if (_isBusy.load()) {
 
         AfxMessageBox(_T("Address book is still busy."),
                       MB_OK | MB_ICONINFORMATION);
-        // Return without calling the base class implementation,
-        // effectively preventing the dialog from closing.
         return;
     }
     CDialogEx::OnOK();
 }
 
 void CAddressBookDlg::OnBnClickedCancel() {
-    // TODO: Add your control notification handler code here
-    // Optionally, display a message to inform the user
     if (_isBusy.load()) {
 
-        AfxMessageBox(_T("Address book is still busy, please close later"),
+        AfxMessageBox(_T("Address book is still busy."),
                       MB_OK | MB_ICONINFORMATION);
-        // Return without calling the base class implementation,
-        // effectively preventing the dialog from closing.
         return;
     }
     CDialogEx::OnCancel();
