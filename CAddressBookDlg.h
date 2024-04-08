@@ -25,6 +25,7 @@ class CAddressBookDlg : public CDialogEx {
     RemoteCaller _remote;
     std::string _access_token;
     std::string _nextLink;
+    CString _chosenEmail;
     std::vector<std::string> _pageStack;
 
     CWinThread *_pThread;
@@ -36,6 +37,8 @@ class CAddressBookDlg : public CDialogEx {
 
     CButton _ctrlBtnPrev;
     CButton _ctrlBtnNext;
+    afx_msg void OnNMDblclkListContacts(NMHDR *pNMHDR, LRESULT *pResult);
+    CString chosenEmail() { return _chosenEmail; }
 };
 
 UINT RetrieveContactThread(LPVOID pParam);

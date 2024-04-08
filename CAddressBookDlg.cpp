@@ -27,6 +27,8 @@ void CAddressBookDlg::DoDataExchange(CDataExchange *pDX) {
 BEGIN_MESSAGE_MAP(CAddressBookDlg, CDialogEx)
 ON_BN_CLICKED(IDC_BUTTON_PREV, &CAddressBookDlg::OnBnClickedButtonPrev)
 ON_BN_CLICKED(IDC_BUTTON_NEXT, &CAddressBookDlg::OnBnClickedButtonNext)
+ON_NOTIFY(NM_DBLCLK, IDC_LIST_CONTACTS,
+          &CAddressBookDlg::OnNMDblclkListContacts)
 END_MESSAGE_MAP()
 
 BOOL CAddressBookDlg::OnInitDialog() {
@@ -130,4 +132,28 @@ void CAddressBookDlg::OnBnClickedButtonNext() {
     _ctrlBtnPrev.EnableWindow(TRUE);
     _pThread = AfxBeginThread(RetrieveContactThread, this,
                               THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
+}
+
+void CAddressBookDlg::OnNMDblclkListContacts(NMHDR *pNMHDR, LRESULT *pResult) {
+    LPNMITEMACTIVATE pNMItemActivate =
+        reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+    // TODO: Add your control notification handler code here
+    *pResult = 0;
+    LVITEM lvItem = {};
+    if (pNMItemActivate->iItem >= 0) {
+        lvItem.pszText = new TCHAR[MAX_PATH]; // Buffer to receive the item text
+        lvItem.cchTextMax = MAX_PATH;
+
+        lvItem.mask = LVIF_TEXT |
+                      LVIF_PARAM; // Specify the mask to retrieve text and data
+        lvItem.iItem = pNMItemActivate->iItem; // Index of the item
+        lvItem.iSubItem =
+            2; // Subitem index (if your list control has subitems)
+
+        _ctrlListContacts.GetItem(&lvItem);
+        _chosenEmail = lvItem.pszText;
+        delete[] lvItem.pszText;
+        OnOK();
+    }
+    // pNMItemActivate->iItem
 }
