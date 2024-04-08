@@ -322,13 +322,6 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
             this->access_token = profile.access_token;
             this->_client.Send(request.c_str(), (int)request.length());
 
-            profile.access_token = token.access_token;
-            profile.profile_endpoint =
-                "https://outlook.office.com/api/v2.0/me/contacts";
-
-            request = RequestContacts::toJson(profile);
-            this->access_token = profile.access_token;
-            this->_client.Send(request.c_str(), (int)request.length());
             break;
         }
         case JsonType::TokenResponseError: {
@@ -399,34 +392,31 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         }
 
         case JsonType::EmailResponseError: {
-
-            if (jsonLogin.find("MailSend") != jsonLogin.end() ||
-                jsonLogin.find("Curl") != jsonLogin.end() ||
-                jsonLogin.find("Http") != jsonLogin.end() ||
-                jsonLogin.find("Serde") != jsonLogin.end() ||
-                jsonLogin.find("RemoteCall") != jsonLogin.end()) {
-                std::string err;
-
-                if (!jsonLogin.at("MailSend").empty()) {
-                    err = jsonLogin.at("MailSend").get<std::string>();
-                } else if (!jsonLogin.at("Curl").empty()) {
-                    err = jsonLogin.at("Curl").get<std::string>();
-                } else if (!jsonLogin.at("Http").empty()) {
-                    err = jsonLogin.at("Http").get<std::string>();
-                } else if (!jsonLogin.at("Serde").empty()) {
-                    err = jsonLogin.at("Serde").get<std::string>();
-                } else if (!jsonLogin.at("RemoteCall").empty()) {
-                    err = jsonLogin.at("RemoteCall").get<std::string>();
-                }
-
-                CString error =
-                    static_cast<LPCTSTR>(Helpers::Utf8ToCString(err));
-
-                AfxMessageBox(error, MB_ICONERROR | MB_OK);
-            } else {
-                AfxMessageBox(_T("Undefined error for Emailer."),
-                              MB_ICONERROR | MB_OK);
+            std::string err;
+            switch (EmailerError::From(jsonLogin)) {
+            case EmailerError::MailSend:
+                err = jsonLogin.at("MailSend").get<std::string>();
+                break;
+            case EmailerError::Curl:
+                err = jsonLogin.at("Curl").get<std::string>();
+                break;
+            case EmailerError::Http:
+                err = jsonLogin.at("Http").get<std::string>();
+                break;
+            case EmailerError::Serde:
+                err = jsonLogin.at("Serde").get<std::string>();
+                break;
+            case EmailerError::RemoteCall:
+                err = jsonLogin.at("RemoteCall").get<std::string>();
+                break;
+            case EmailerError::Unknown:
+                err = "Unknown error from Emailer Service.";
+                break;
             }
+
+            CString error = static_cast<LPCTSTR>(Helpers::Utf8ToCString(err));
+
+            AfxMessageBox(error, MB_ICONERROR | MB_OK);
             break;
         }
         case JsonType::DeviceCodeFlowResponse: {
