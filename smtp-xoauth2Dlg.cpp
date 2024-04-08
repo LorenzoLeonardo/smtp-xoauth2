@@ -60,6 +60,7 @@ void Csmtpxoauth2Dlg::DoDataExchange(CDataExchange *pDX) {
     DDX_Control(pDX, IDC_EDIT_RECIPIENTS, _ctrlEditRecipients);
     DDX_Control(pDX, IDC_EDIT_SUBJECT, _ctrlEditSubject);
     DDX_Control(pDX, IDC_EDIT_BODY, _ctrlEditBody);
+    DDX_Control(pDX, IDC_STATIC_COPYRIGHT, _ctrlCopyRight);
 }
 
 BEGIN_MESSAGE_MAP(Csmtpxoauth2Dlg, CDialogEx)
@@ -80,8 +81,10 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
 
     CString title = _T("SMTP XOAuth2 Test Tool For Windows - v") +
                     Helpers::GetProductVersion();
+    CString copyRight = Helpers::GetLegalCopyright();
 
     SetWindowText(title);
+    _ctrlCopyRight.SetWindowText(copyRight);
 
     ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
     ASSERT(IDM_ABOUTBOX < 0xF000);
