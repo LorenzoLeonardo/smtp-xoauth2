@@ -556,5 +556,7 @@ void Csmtpxoauth2Dlg::OnBnClickedButtonContacts() {
     CAddressBookDlg dlg;
     dlg.setToken(access_token);
 
-    dlg.DoModal();
+    if (dlg.DoModal() == IDOK) {
+        _ctrlEditRecipients.SetWindowText(dlg.chosenEmail());
+    }
 }

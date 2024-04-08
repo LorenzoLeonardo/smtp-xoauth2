@@ -101,6 +101,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     afx_msg void OnPaint();
     afx_msg HCURSOR OnQueryDragIcon();
     DECLARE_MESSAGE_MAP()
+
   public:
     CEdit _ctrlEditSenderName;
     CEdit _ctrlEditSenderEmail;
@@ -115,7 +116,6 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     void requestToken();
     void handleJsonMessages(std::string jsonStr);
     void clearFields();
-
     JsonType determineJsonType(const nlohmann::json &json_data);
     TokenResponse handleTokenResponse(json jsonLogin);
     TokenResponseError handleTokenResponseError(json jsonLogin);
