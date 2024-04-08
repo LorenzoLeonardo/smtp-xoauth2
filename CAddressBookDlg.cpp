@@ -98,11 +98,12 @@ void CAddressBookDlg::PopulateList() {
         _ctrlListContacts.SetItemText(
             nRow, 1, static_cast<LPCTSTR>(Helpers::Utf8ToCString(mobile)));
 
-        std::vector<std::string> email = item["EmailAddressess"];
+        std::vector<json> email = item["EmailAddresses"];
         if (!email.empty()) {
             _ctrlListContacts.SetItemText(
                 nRow, 2,
-                static_cast<LPCTSTR>(Helpers::Utf8ToCString(email[0])));
+                static_cast<LPCTSTR>(Helpers::Utf8ToCString(
+                    email[0].at("Address").get<std::string>())));
         }
         nRow++;
     }
