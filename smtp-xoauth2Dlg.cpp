@@ -78,9 +78,11 @@ END_MESSAGE_MAP()
 BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     CDialogEx::OnInitDialog();
 
-    // Add "About..." menu item to system menu.
+    CString title = _T("SMTP XOAuth2 Test Tool For Windows - v") +
+                    Helpers::GetProductVersion();
 
-    // IDM_ABOUTBOX must be in the system command range.
+    SetWindowText(title);
+
     ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
     ASSERT(IDM_ABOUTBOX < 0xF000);
 
@@ -112,6 +114,7 @@ BOOL Csmtpxoauth2Dlg::OnInitDialog() {
 void Csmtpxoauth2Dlg::OnSysCommand(UINT nID, LPARAM lParam) {
     if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
         CAboutDlg dlgAbout;
+
         dlgAbout.DoModal();
     } else {
         CDialogEx::OnSysCommand(nID, lParam);

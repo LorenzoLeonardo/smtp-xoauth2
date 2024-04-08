@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "Helpers.h"
-#include <atlstr.h>
+#include <iostream>
 
 std::string Helpers::Utf8ToAnsi(const std::string &utf8Str) {
     // Convert UTF-8 to ANSI
@@ -96,7 +96,6 @@ std::vector<std::string> Helpers::separate(const std::string &data) {
     }
     parts.push_back("{" + json_str);
 
-
     return parts;
 }
 
@@ -115,4 +114,80 @@ Helpers::removeDuplicates(const std::vector<std::string> &vec) {
     result.assign(sortedVec.begin(), it);
 
     return result;
+}
+
+CString Helpers::GetProductVersion() {
+    CString versionString;
+    TCHAR szFilePath[MAX_PATH] = {};
+    if (GetModuleFileName(NULL, szFilePath, MAX_PATH) != 0) {
+        DWORD dwDummy = 0;
+        DWORD dwSize = GetFileVersionInfoSize(szFilePath, &dwDummy);
+        if (dwSize != 0) {
+            BYTE *pVersionInfo = new BYTE[dwSize];
+            if (GetFileVersionInfo(szFilePath, 0, dwSize, pVersionInfo) != 0) {
+                VS_FIXEDFILEINFO *pFileInfo = nullptr;
+                UINT uLen;
+                if (VerQueryValue(pVersionInfo, _T("\\"), (LPVOID *)&pFileInfo,
+                                  &uLen) != 0) {
+                    WORD major = HIWORD(pFileInfo->dwProductVersionMS);
+                    WORD minor = LOWORD(pFileInfo->dwProductVersionMS);
+                    WORD build = HIWORD(pFileInfo->dwProductVersionLS);
+                    WORD revision = LOWORD(pFileInfo->dwProductVersionLS);
+                    versionString.Format(_T("%d.%d.%d.%d"), major, minor, build,
+                                         revision);
+                }
+            }
+            delete[] pVersionInfo;
+        }
+    }
+    return versionString;
+}
+
+CString Helpers::GetLegalCopyright() {
+    TCHAR strFilePath[MAX_PATH] = {};
+    if (GetModuleFileName(NULL, strFilePath, MAX_PATH) == 0) {
+        return _T("");
+    }
+
+    // Get the size of the version information
+    DWORD dwHandle = 0, dwSize = 0;
+    dwSize = GetFileVersionInfoSize(strFilePath, &dwHandle);
+    if (dwSize == 0) {
+        std::cerr << "Failed to get version information size." << std::endl;
+        return CString();
+    }
+
+    // Allocate memory for the version information
+    std::vector<BYTE> versionInfo(dwSize);
+    if (!GetFileVersionInfo(strFilePath, 0, dwSize, versionInfo.data())) {
+        std::cerr << "Failed to get version information." << std::endl;
+        return CString();
+    }
+
+    // Get the language and code page
+    DWORD *pTranslation = nullptr;
+    UINT cbTranslation = 0;
+    if (!VerQueryValue(versionInfo.data(), _T("\\VarFileInfo\\Translation"),
+                       reinterpret_cast<LPVOID *>(&pTranslation),
+                       &cbTranslation)) {
+        std::cerr << "Failed to get translation information." << std::endl;
+        return CString();
+    }
+
+    // Form the query string for LegalCopyright
+    CString strQuery;
+    strQuery.Format(_T("\\StringFileInfo\\%04x%04x\\LegalCopyright"),
+                    LOWORD(*pTranslation), HIWORD(*pTranslation));
+
+    // Retrieve the LegalCopyright
+    LPTSTR lpLegalCopyright = nullptr;
+    UINT cbData = 0;
+    if (!VerQueryValue(versionInfo.data(), strQuery,
+                       reinterpret_cast<LPVOID *>(&lpLegalCopyright),
+                       &cbData)) {
+        std::cerr << "Failed to get LegalCopyright." << std::endl;
+        return CString();
+    }
+
+    return CString(lpLegalCopyright);
 }
