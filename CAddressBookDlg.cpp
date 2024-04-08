@@ -42,7 +42,8 @@ BOOL CAddressBookDlg::OnInitDialog() {
 
     try {
         _remote.connect();
-        PopulateList();
+        _pThread = AfxBeginThread(RetrieveContactThread, this,
+                                  THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
     } catch (const SmtpError error) {
         AfxMessageBox(
             static_cast<LPCTSTR>(Helpers::Utf8ToCString(error.what())),
@@ -50,6 +51,13 @@ BOOL CAddressBookDlg::OnInitDialog() {
     }
 
     return TRUE;
+}
+
+UINT RetrieveContactThread(LPVOID pParam) {
+    CAddressBookDlg *dlg = static_cast<CAddressBookDlg *>(pParam);
+
+    dlg->PopulateList();
+    return 0;
 }
 
 void CAddressBookDlg::PopulateList() {
@@ -65,6 +73,9 @@ void CAddressBookDlg::PopulateList() {
     json param = {{"access_token", profile.access_token},
                   {"profile_endpoint", profile.profile_endpoint}};
 
+    BOOL bPrev = _ctrlBtnPrev.IsWindowEnabled();
+    _ctrlBtnNext.EnableWindow(FALSE);
+    _ctrlBtnPrev.EnableWindow(FALSE);
     json response = _remote.remoteCall(object, method, param);
     int nRow = 0;
 
@@ -76,7 +87,7 @@ void CAddressBookDlg::PopulateList() {
         _pageStack.push_back(_nextLink);
         _nextLink = response.at("@odata.nextLink").get<std::string>();
     }
-
+    _ctrlBtnPrev.EnableWindow(bPrev);
     for (const auto &item : response.at("value")) {
         std::string name = item["DisplayName"];
         _ctrlListContacts.InsertItem(
@@ -98,6 +109,7 @@ void CAddressBookDlg::PopulateList() {
 }
 void CAddressBookDlg::OnBnClickedButtonPrev() {
     // TODO: Add your control notification handler code here
+
     if (!_pageStack.empty()) {
         _pageStack.pop_back();
         _nextLink = _pageStack.back();
@@ -108,11 +120,13 @@ void CAddressBookDlg::OnBnClickedButtonPrev() {
     } else {
         _ctrlBtnPrev.EnableWindow(FALSE);
     }
-    PopulateList();
+    _pThread = AfxBeginThread(RetrieveContactThread, this,
+                              THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
 }
 
 void CAddressBookDlg::OnBnClickedButtonNext() {
     // TODO: Add your control notification handler code here
     _ctrlBtnPrev.EnableWindow(TRUE);
-    PopulateList();
+    _pThread = AfxBeginThread(RetrieveContactThread, this,
+                              THREAD_PRIORITY_NORMAL, 0, 0, nullptr);
 }
