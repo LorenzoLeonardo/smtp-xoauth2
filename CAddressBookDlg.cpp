@@ -68,7 +68,6 @@ UINT RetrieveContactThread(LPVOID pParam) {
 }
 
 void HandeError(json &input) {
-    std::string son = input.dump();
     std::string err;
     switch (EmailerError::From(input)) {
     case EmailerError::MailSend:
