@@ -1,6 +1,9 @@
 #pragma once
 
+#include <afxver_.h> // For VS_FIXEDFILEINFO definition
+#include <afxwin.h>
 #include <algorithm>
+#include <atlstr.h>
 #include <string>
 #include <vector>
 
@@ -13,4 +16,6 @@ std::string CStringToUtf8(const CStringW &cstr);
 std::vector<unsigned char> string_to_vec(std::string str);
 std::vector<std::string> separate(const std::string &data);
 std::vector<std::string> removeDuplicates(const std::vector<std::string> &vec);
+CString GetLegalCopyright();
+CString GetProductVersion();
 }; // namespace Helpers
