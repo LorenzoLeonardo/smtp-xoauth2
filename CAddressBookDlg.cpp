@@ -67,6 +67,34 @@ UINT RetrieveContactThread(LPVOID pParam) {
     return 0;
 }
 
+void HandeError(json &input) {
+    std::string son = input.dump();
+    std::string err;
+    switch (EmailerError::From(input)) {
+    case EmailerError::MailSend:
+        err = input.at("MailSend").get<std::string>();
+        break;
+    case EmailerError::Curl:
+        err = input.at("Curl").get<std::string>();
+        break;
+    case EmailerError::Http:
+        err = input.at("Http").get<std::string>();
+        break;
+    case EmailerError::Serde:
+        err = input.at("Serde").get<std::string>();
+        break;
+    case EmailerError::RemoteCall:
+        err = input.at("RemoteCall").get<std::string>();
+        break;
+    case EmailerError::Unknown:
+        break;
+    }
+
+    CString error = static_cast<LPCTSTR>(Helpers::Utf8ToCString(err));
+
+    AfxMessageBox(error, MB_ICONERROR | MB_OK);
+}
+
 void CAddressBookDlg::PopulateList() {
     _ctrlListContacts.DeleteAllItems();
 
@@ -86,33 +114,37 @@ void CAddressBookDlg::PopulateList() {
     json response = _remote.remoteCall(object, method, param);
     int nRow = 0;
 
-    if (response.at("@odata.nextLink").empty()) {
-        _ctrlBtnNext.EnableWindow(FALSE);
-        _pageStack.push_back(_nextLink);
+    if (EmailerError::From(response) != EmailerError::Unknown) {
+        HandeError(response);
     } else {
-        _ctrlBtnNext.EnableWindow(TRUE);
-        _pageStack.push_back(_nextLink);
-        _nextLink = response.at("@odata.nextLink").get<std::string>();
-    }
-    _ctrlBtnPrev.EnableWindow(bPrev);
-    for (const auto &item : response.at("value")) {
-        std::string name = item["DisplayName"];
-        _ctrlListContacts.InsertItem(
-            LVIF_TEXT | LVIF_STATE, nRow,
-            static_cast<LPCTSTR>(Helpers::Utf8ToCString(name)), 0, 0, 0, 0);
-
-        std::string mobile = item["MobilePhone1"];
-        _ctrlListContacts.SetItemText(
-            nRow, 1, static_cast<LPCTSTR>(Helpers::Utf8ToCString(mobile)));
-
-        std::vector<json> email = item["EmailAddresses"];
-        if (!email.empty()) {
-            _ctrlListContacts.SetItemText(
-                nRow, 2,
-                static_cast<LPCTSTR>(Helpers::Utf8ToCString(
-                    email[0].at("Address").get<std::string>())));
+        if (response.at("@odata.nextLink").empty()) {
+            _ctrlBtnNext.EnableWindow(FALSE);
+            _pageStack.push_back(_nextLink);
+        } else {
+            _ctrlBtnNext.EnableWindow(TRUE);
+            _pageStack.push_back(_nextLink);
+            _nextLink = response.at("@odata.nextLink").get<std::string>();
         }
-        nRow++;
+        _ctrlBtnPrev.EnableWindow(bPrev);
+        for (const auto &item : response.at("value")) {
+            std::string name = item["DisplayName"];
+            _ctrlListContacts.InsertItem(
+                LVIF_TEXT | LVIF_STATE, nRow,
+                static_cast<LPCTSTR>(Helpers::Utf8ToCString(name)), 0, 0, 0, 0);
+
+            std::string mobile = item["MobilePhone1"];
+            _ctrlListContacts.SetItemText(
+                nRow, 1, static_cast<LPCTSTR>(Helpers::Utf8ToCString(mobile)));
+
+            std::vector<json> email = item["EmailAddresses"];
+            if (!email.empty()) {
+                _ctrlListContacts.SetItemText(
+                    nRow, 2,
+                    static_cast<LPCTSTR>(Helpers::Utf8ToCString(
+                        email[0].at("Address").get<std::string>())));
+            }
+            nRow++;
+        }
     }
 }
 void CAddressBookDlg::OnBnClickedButtonPrev() {
