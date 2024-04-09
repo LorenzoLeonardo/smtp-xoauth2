@@ -3,6 +3,7 @@
 #include "pch.h"
 
 #include "CAddressBookDlg.h"
+#include "Config.h"
 #include "Emailer.h"
 #include "Error.h"
 #include "Helpers.h"
@@ -12,7 +13,9 @@
 // CAddressBookDlg dialog
 CAddressBookDlg::CAddressBookDlg(CWnd *pParent /*=nullptr*/)
     : CDialogEx(IDD_DIALOG_ADDRESS_BOOK, pParent) {
-    _nextLink = "https://outlook.office.com/api/v2.0/me/contacts";
+    Config config = Config::getInstance();
+
+    _nextLink = config.provider.contacts_endpoint;
 }
 
 CAddressBookDlg::~CAddressBookDlg() {}

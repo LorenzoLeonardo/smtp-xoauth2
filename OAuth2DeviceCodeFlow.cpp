@@ -1,28 +1,24 @@
 #include "pch.h"
 
+#include "Config.h"
 #include "Helpers.h"
 #include "OAuth2DeviceCodeFlow.h"
 
 DeviceCodeFlow
 OAuth2DeviceCodeFlow::generateDeviceCodeFlow(std::string method) {
     DeviceCodeFlow flow;
+    Config config = Config::getInstance();
 
     flow.object = "oauth2.device.code.flow";
     flow.method = method;
-    flow.param.authorization_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
-    flow.param.device_auth_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode";
-    flow.param.token_endpoint =
-        "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-
-    flow.param.client_id = "64c5d510-4b7e-4a18-8869-89778461c266";
+    flow.param.authorization_endpoint = config.provider.auth_endpoint;
+    flow.param.device_auth_endpoint = config.provider.device_auth_endpoint;
+    flow.param.token_endpoint = config.provider.token_endpoint;
+    flow.param.client_id = config.provider.client_id;
     flow.param.process = "smtp-xoauth2";
-    flow.param.provider = "Microsoft";
-    flow.param.scopes.push_back("offline_access");
-    flow.param.scopes.push_back("https://outlook.office.com/SMTP.Send");
-    flow.param.scopes.push_back("https://outlook.office.com/User.Read");
-    flow.param.scopes.push_back("https://outlook.office.com/Contacts.Read");
+    flow.param.provider = config.provider.name;
+    flow.param.scopes = config.provider.scopes;
+
     return flow;
 }
 
