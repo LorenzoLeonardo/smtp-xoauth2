@@ -4,6 +4,7 @@
 
 #pragma once
 #include "CLoginDlg.h"
+#include "Config.h"
 #include "OAuth2DeviceCodeFlow.h"
 #include "TcpClient.h"
 
@@ -108,6 +109,7 @@ class Csmtpxoauth2Dlg : public CDialogEx {
     CEdit _ctrlEditRecipients;
     CEdit _ctrlEditSubject;
     CEdit _ctrlEditBody;
+    Config _config;
 
     TcpClient _client;
     CWinThread *_pThread;

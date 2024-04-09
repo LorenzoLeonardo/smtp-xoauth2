@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Error.h"
 #include "Helpers.h"
 
 std::string Helpers::Utf8ToAnsi(const std::string &utf8Str) {
@@ -191,20 +192,21 @@ CString Helpers::GetLegalCopyright() {
     return CString(lpLegalCopyright);
 }
 
-json Helpers::loadJsonFromFile(std::string &path) {
+json Helpers::loadJsonFromFile(const char *path) {
     // Parse the JSON content
     json jsonData = {};
     std::ifstream jsonFile(path);
     if (!jsonFile.is_open()) {
         std::cerr << "Failed to open JSON file" << std::endl;
-        return jsonData;
+        throw SmtpError("Failed to open JSON file");
     }
 
     try {
         jsonFile >> jsonData;
     } catch (json::parse_error &e) {
-        std::cerr << "Parse error: " << e.what() << std::endl;
-        return jsonData;
+        std::string err = std::format("Parse error: {}", e.what());
+        std::cerr << err << std::endl;
+        throw SmtpError(err);
     }
 
     // Close the file

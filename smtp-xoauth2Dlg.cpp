@@ -79,6 +79,11 @@ END_MESSAGE_MAP()
 BOOL Csmtpxoauth2Dlg::OnInitDialog() {
     CDialogEx::OnInitDialog();
 
+    if (!_config.loadConfigFromFile("config.json")) {
+        AfxMessageBox(_T("Failed to load config.json"), MB_ICONERROR | MB_OK);
+        return FALSE;
+    }
+
     CString title = _T("SMTP XOAuth2 Test Tool For Windows - v") +
                     Helpers::GetProductVersion();
     CString copyRight = Helpers::GetLegalCopyright();
