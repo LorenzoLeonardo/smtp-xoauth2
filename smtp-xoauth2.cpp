@@ -3,6 +3,7 @@
 //
 #include "pch.h"
 
+#include "Config.h"
 #include "Error.h"
 #include "Helpers.h"
 #include "TcpClient.h"
@@ -34,6 +35,7 @@ Csmtpxoauth2App theApp;
 // Csmtpxoauth2App initialization
 
 BOOL Csmtpxoauth2App::InitInstance() {
+
     // InitCommonControlsEx() is required on Windows XP if an application
     // manifest specifies use of ComCtl32.dll version 6 or later to enable
     // visual styles.  Otherwise, any window creation will fail.
@@ -70,8 +72,8 @@ BOOL Csmtpxoauth2App::InitInstance() {
     SetRegistryKey(_T("Local AppWizard-Generated Applications"));
 
     try {
-
-        TcpClient client = TcpClient("127.0.0.1", 1986);
+        Config config = Config::getInstance();
+        TcpClient client = TcpClient(config.server.c_str(), config.port);
 
         client.Connect();
 
@@ -80,12 +82,15 @@ BOOL Csmtpxoauth2App::InitInstance() {
 
         Csmtpxoauth2Dlg dlg;
 
+        dlg.SetConfig(config);
         dlg.SetTcpClient(client);
         m_pMainWnd = &dlg;
 
         INT_PTR nResponse = dlg.DoModal();
 
-        dlg._pThread->ResumeThread();
+        if (dlg._pThread != nullptr) {
+            dlg._pThread->ResumeThread();
+        }
         if (nResponse == IDOK) {
             // TODO: Place code here to handle when the dialog is
             //  dismissed with OK
