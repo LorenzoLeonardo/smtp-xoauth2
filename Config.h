@@ -2,40 +2,14 @@
 #include <string>
 #include <vector>
 
-class Singleton {
-  public:
-    // Static member function to access the singleton instance
-    static Singleton &getInstance() {
-        static Singleton instance; // Initialized on first use.
-        return instance;
-    }
-
-    // Delete the copy constructor and assignment operator
-    Singleton(const Singleton &) = delete;
-    Singleton &operator=(const Singleton &) = delete;
-
-    // Other member functions and variables can be added as needed
-
-  private:
-    // Private constructor to prevent instantiation
-    Singleton() {
-        // Initialization code goes here
-    }
-
-    // Destructor to perform cleanup if needed
-    ~Singleton() {
-        // Cleanup code goes here
-    }
-
-    // Private data members can be added as needed
-};
-
 class Config {
   public:
     static class Config &getInstance() {
-        static Config instance; // Initialized on first use.
+        static Config instance;
         return instance;
     }
+
+    Config() { loadConfigFromFile("config.json"); }
 
     struct Provider {
         std::string name;
@@ -51,9 +25,6 @@ class Config {
     unsigned short port;
     Provider provider;
 
+  private:
     void loadConfigFromFile(const char *path);
-
-    Config() { loadConfigFromFile("config.json"); }
-
-    ~Config() {}
 };
