@@ -109,6 +109,8 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include=".clang-format" />
+    <None Include="config.ini" />
+    <None Include="config.json" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\smtp-xoauth2.ico">

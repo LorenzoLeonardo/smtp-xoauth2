@@ -231,6 +231,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
+    <None Include="config.ini" />
+    <None Include="config.json" />
     <None Include="res\smtpxoauth2.rc2" />
   </ItemGroup>
   <ItemGroup>
