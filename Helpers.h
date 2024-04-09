@@ -7,9 +7,12 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
+
+using json = nlohmann::json;
 
 namespace Helpers {
 std::string Utf8ToAnsi(const std::string &utf8Str);
@@ -22,7 +25,5 @@ std::vector<std::string> separate(const std::string &data);
 std::vector<std::string> removeDuplicates(const std::vector<std::string> &vec);
 CString GetLegalCopyright();
 CString GetProductVersion();
-std::map<std::string, std::map<std::string, std::string>>
-parseINI(const std::string &filename);
-std::string trim(const std::string &str);
+json loadJsonFromFile(std::string &path);
 }; // namespace Helpers
