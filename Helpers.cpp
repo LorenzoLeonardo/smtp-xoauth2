@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include "Helpers.h"
-#include <iostream>
 
 std::string Helpers::Utf8ToAnsi(const std::string &utf8Str) {
     // Convert UTF-8 to ANSI
@@ -190,4 +189,51 @@ CString Helpers::GetLegalCopyright() {
     }
 
     return CString(lpLegalCopyright);
+}
+
+// Function to trim leading and trailing whitespaces from a string
+std::string Helpers::trim(const std::string &str) {
+    size_t first = str.find_first_not_of(' ');
+    if (std::string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
+// Function to parse an INI file and store its contents in a map
+std::map<std::string, std::map<std::string, std::string>>
+Helpers::parseINI(const std::string &filename) {
+    std::map<std::string, std::map<std::string, std::string>> iniContents;
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return iniContents;
+    }
+
+    std::string currentSection;
+    std::string line;
+    while (std::getline(file, line)) {
+        line = trim(line);
+        if (line.empty() || line[0] == ';' || line[0] == '#') {
+            // Skip comments and empty lines
+            continue;
+        } else if (line[0] == '[' && line.back() == ']') {
+            // Section header found
+            currentSection = line.substr(1, line.size() - 2);
+        } else {
+            // Key-value pair found
+            std::istringstream iss(line);
+            std::string key, value;
+            if (std::getline(iss, key, '=')) {
+                if (std::getline(iss, value)) {
+                    iniContents[currentSection][trim(key)] = trim(value);
+                }
+            }
+        }
+    }
+
+    file.close();
+    return iniContents;
 }
