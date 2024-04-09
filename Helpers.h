@@ -25,5 +25,5 @@ std::vector<std::string> separate(const std::string &data);
 std::vector<std::string> removeDuplicates(const std::vector<std::string> &vec);
 CString GetLegalCopyright();
 CString GetProductVersion();
-json loadJsonFromFile(std::string &path);
+json loadJsonFromFile(const char *path);
 }; // namespace Helpers

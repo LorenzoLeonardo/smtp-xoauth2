@@ -44,7 +44,6 @@ BOOL CAddressBookDlg::OnInitDialog() {
     _ctrlListContacts.InsertColumn(0, _T("Name"), LVCFMT_LEFT, 200);
     _ctrlListContacts.InsertColumn(1, _T("Contact Numer"), LVCFMT_LEFT, 100);
     _ctrlListContacts.InsertColumn(2, _T("Email Address"), LVCFMT_LEFT, 200);
-
     _isBusy.store(false);
     try {
         _remote.connect();
