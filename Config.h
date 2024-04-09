@@ -49,7 +49,7 @@ class Config {
     };
     std::string server;
     unsigned short port;
-    std::vector<Provider> providers;
+    Provider provider;
 
     void loadConfigFromFile(const char *path);
 

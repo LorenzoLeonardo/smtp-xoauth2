@@ -311,6 +311,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
         }
         case JsonType::TokenResponse: {
             TokenResponse token = handleTokenResponse(jsonLogin);
+            Config config = Config::getInstance();
 
             _pLoginDialog->ShowWindow(SW_HIDE);
             _pLoginDialog->UpdateWindow();
@@ -318,7 +319,7 @@ void Csmtpxoauth2Dlg::handleJsonMessages(std::string jsonStr) {
 
             Profile profile;
             profile.access_token = token.access_token;
-            profile.profile_endpoint = "https://outlook.office.com/api/v2.0/me";
+            profile.profile_endpoint = config.provider.profile_endpoint;
 
             std::string request = RequestProfile::toJson(profile);
             this->access_token = profile.access_token;

@@ -10,21 +10,18 @@ void Config::loadConfigFromFile(const char *path) {
 
     server = config["Server"];
     port = config["Port"];
+    json elem = config["Providers"];
 
-    for (auto &elem : config["Providers"]) {
-        struct Provider provider = {};
-
-        provider.auth_endpoint = elem["AuthorizationEndpoint"];
-        provider.client_id = elem["ClientId"];
-        provider.contacts_endpoint = elem["ContactsEndpoint"];
-        provider.device_auth_endpoint = elem["DeviceAuthEndpoint"];
-        provider.name = elem["Name"];
-        provider.profile_endpoint = elem["ProfileEndpoint"];
-        for (auto &scopes : elem["Scopes"]) {
-            provider.scopes.push_back(scopes.get<std::string>());
-        }
-        provider.token_endpoint = elem["TokenEndpoint"];
-        providers.push_back(provider);
+    provider.auth_endpoint = elem["AuthorizationEndpoint"];
+    provider.client_id = elem["ClientId"];
+    provider.contacts_endpoint = elem["ContactsEndpoint"];
+    provider.device_auth_endpoint = elem["DeviceAuthEndpoint"];
+    provider.name = elem["Name"];
+    provider.profile_endpoint = elem["ProfileEndpoint"];
+    for (auto &scopes : elem["Scopes"]) {
+        provider.scopes.push_back(scopes.get<std::string>());
     }
+    provider.token_endpoint = elem["TokenEndpoint"];
+
     return;
 }

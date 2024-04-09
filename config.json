@@ -1,21 +1,20 @@
 {
   "Server":"127.0.0.1",
   "Port":1986,
-  "Providers": [
-    {
-      "Name": "Microsoft",
-      "ProfileEndpoint": "https://outlook.office.com/api/v2.0/me",
-      "AuthorizationEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-      "DeviceAuthEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode",
-      "TokenEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-      "ContactsEndpoint": "https://outlook.office.com/api/v2.0/me/contacts",
-      "ClientId": "64c5d510-4b7e-4a18-8869-89778461c266",
-      "Scopes": [
-        "offline_access",
-        "https://outlook.office.com/SMTP.Send",
-        "https://outlook.office.com/User.Read",
-        "https://outlook.office.com/Contacts.Read"
-      ]
-    }
-  ]
-}
+  "Providers":
+  {
+    "Name": "Microsoft",
+    "ProfileEndpoint": "https://outlook.office.com/api/v2.0/me",
+    "AuthorizationEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    "DeviceAuthEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode",
+    "TokenEndpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    "ContactsEndpoint": "https://outlook.office.com/api/v2.0/me/contacts",
+    "ClientId": "64c5d510-4b7e-4a18-8869-89778461c266",
+    "Scopes": [
+      "offline_access",
+      "https://outlook.office.com/SMTP.Send",
+      "https://outlook.office.com/User.Read",
+      "https://outlook.office.com/Contacts.Read"
+    ]
+  }
+ }
